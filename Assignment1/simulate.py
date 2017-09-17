@@ -50,6 +50,7 @@ if __name__ == '__main__':
         # mean and standard deviation in one dimension
         mu = 0
         sigma = 1
+        # sigma = 10
         x = np.random.normal(mu, sigma, numsamples)        
         y = np.zeros(numsamples,)
         z = np.zeros(numsamples,)
