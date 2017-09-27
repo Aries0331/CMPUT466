@@ -49,8 +49,8 @@ if __name__ == '__main__':
     if dim == 1:
         # mean and standard deviation in one dimension
         mu = 0
-        sigma = 1
-        # sigma = 10
+        # sigma = 1
+        sigma = 10
         x = np.random.normal(mu, sigma, numsamples)        
         y = np.zeros(numsamples,)
         z = np.zeros(numsamples,)
