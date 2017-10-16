@@ -87,3 +87,5 @@ if __name__ == '__main__':
         #print ('Best parameters for ' + learnername + ': ' + str(learner.getparams()))
         print ('Average error for ' + learnername + ': ' + str(besterror))
 
+    # report the standard error, 
+    # i.e. the sample standard deviation divided by the square root of the number of runs.
