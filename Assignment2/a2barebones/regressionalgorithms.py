@@ -88,10 +88,11 @@ class MeanPredictor(Regressor):
 
 class FSLinearRegression(Regressor):
     """
-    Linear Regression with feature selection, and ridge regularization
+    Linear Regression with feature selection(FS), and ridge regularization
+    Main linear Regression class
     """
     def __init__( self, parameters={} ):
-        self.params = {'features': [1,2,3,4,5]}
+        self.params = {'features': [1,2,3,4,5]} # subselected features
         self.reset(parameters)
 
     def learn(self, Xtrain, ytrain):
@@ -100,7 +101,7 @@ class FSLinearRegression(Regressor):
         # to make the regularization parameter not dependent on numsamples
         numsamples = Xtrain.shape[0]
         Xless = Xtrain[:,self.params['features']]
-        self.weights = np.dot(np.dot(np.linalg.inv(np.dot(Xless.T,Xless)/numsamples), Xless.T),ytrain)/numsamples
+        self.weights = np.dot(np.dot(np.linalg.inv(np.dot(Xless.T,Xless)/numsamples), Xless.T),ytrain)/numsamples # simple explicitly slove for w
 
     def predict(self, Xtest):
         Xless = Xtest[:,self.params['features']]
