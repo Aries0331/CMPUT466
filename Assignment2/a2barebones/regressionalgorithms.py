@@ -101,7 +101,22 @@ class FSLinearRegression(Regressor):
         # to make the regularization parameter not dependent on numsamples
         numsamples = Xtrain.shape[0]
         Xless = Xtrain[:,self.params['features']]
-        self.weights = np.dot(np.dot(np.linalg.inv(np.dot(Xless.T,Xless)/numsamples), Xless.T),ytrain)/numsamples # simple explicitly slove for w
+        # print (Xless)
+
+        # Sigular Value Decomposition for Xless, s is the singular values
+        U, s, V = np.linalg.svd(Xless, full_matrices=True)
+        print(s)
+        # If the sigular value is 0 at the diagonal, force of weight of corresponding feature to be 0
+        # for i in range(len(s)):
+        #     if s[i] == 0:
+        #         self.weights[i] = 0
+        #     else:
+        #         self.weights[i] = np.dot(np.dot(np.linalg.inv(np.dot(Xless[i].T,Xless[i])/numsamples), Xless[i].T),ytrain)/numsamples
+
+        # self.weights = np.dot(np.dot(np.linalg.inv(np.dot(Xless.T,Xless)/numsamples), Xless.T),ytrain)/numsamples # simple explicitly slove for w
+        print (self.weights)
+        # presudoinverse pinv
+        self.weights = np.dot(np.dot(np.linalg.pinv(np.dot(Xless.T,Xless)/numsamples), Xless.T),ytrain)/numsamples # simple explicitly slove for w
 
     def predict(self, Xtest):
         Xless = Xtest[:,self.params['features']]
@@ -116,8 +131,25 @@ class RidgeLinearRegression(Regressor):
     Below you will also need to implement other classes for the other algorithms
     """
     def __init__( self, parameters={} ):
-        # Default parameters, any of which can be overwritten by values passed to params
-        self.params = {'regwgt': 0.5}
-        self.reset(parameters)
+        self.params = {'features': [1,2,3,4,5]}
 
+        # Default parameters, any of which can be overwritten by values passed to params
+        # self.params = {'regwgt': 0.5}
+        self.reset(parameters) 
+
+    def learn(self, Xtrain, ytrain):
+        '''Learns using the traindate'''
+        # Dividing by numsamples before adding ridge regularization
+        # to make the regularization parameter not dependent on numsamples
+        numsamples = Xtrain.shape[0] # shape[0] calculates the number of rows, shape[1] calculates the number of columns
+        Xless = Xtrain[:,self.params['features']]
+
+        # For Ridge Regression, add a ridger regularizer
+        # lambda = 0.01
+        self.weights = np.dot(np.dot(np.linalg.pinv(np.dot(Xless.T,Xless)/numsamples), Xless.T),ytrain)/numsamples # simple explicitly slove for w
+
+    def predict(self, Xtest):
+        Xless = Xtest[:,self.params['features']]
+        ytest = np.dot(Xless, self.weights) + 0.01*np.dot(self.weights,self.weights)
+        return ytest
     

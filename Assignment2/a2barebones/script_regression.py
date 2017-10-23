@@ -21,7 +21,12 @@ def l2err_squared(prediction,ytest):
 
 def geterror(predictions, ytest):
     # Can change this to other error values
-    return l2err(predictions,ytest)/ytest.shape[0]
+    return (l2err_squared(predictions,ytest)/ytest.shape[0])/2
+
+def stderr(predictions, ytest):
+    ''' standard error '''
+    a = np.array(predictions,ytest)
+    std = np.std(a, ddof=1)
 
 
 if __name__ == '__main__':
@@ -32,12 +37,12 @@ if __name__ == '__main__':
     regressionalgs = {'Random': algs.Regressor(),
                 'Mean': algs.MeanPredictor(),
                 'FSLinearRegression5': algs.FSLinearRegression({'features': [1,2,3,4,5]}),
-                'FSLinearRegression50': algs.FSLinearRegression({'features': range(50)}),
+                # 'FSLinearRegression50': algs.FSLinearRegression({'features': range(50)}),
                 # Increase the number of selected features (up to all the features)
-                'FSLinearRegression100': algs.FSLinearRegression({'features': range(100)}),
-                'FSLinearRegression200': algs.FSLinearRegression({'features': range(200)}),
-                'FSLinearRegression385': algs.FSLinearRegression({'features': range(385)}),
-                'RidgeLinearRegression': algs.RidgeLinearRegression(),
+                # 'FSLinearRegression100': algs.FSLinearRegression({'features': range(100)}),
+                # 'FSLinearRegression200': algs.FSLinearRegression({'features': range(200)}),
+                # 'FSLinearRegression385': algs.FSLinearRegression({'features': range(385)}),
+                'RidgeLinearRegression': algs.RidgeLinearRegression({'features': [1,2,3,4,5]}),
              }
     numalgs = len(regressionalgs)
 
@@ -68,8 +73,14 @@ if __name__ == '__main__':
                 learner.learn(trainset[0], trainset[1])
                 # Test model
                 predictions = learner.predict(testset[0])
+                # print ("predictions:")
+                # print (predictions)
+                # print ("testset")
+                # print (testset[1])
                 error = geterror(testset[1], predictions)
+                stderr = np.std(predictions,ddof=1)
                 print ('Error for ' + learnername + ': ' + str(error))
+                print ('Standard error for ' + learnername + ': ' + str(stderr))
                 errors[learnername][p,r] = error
 
 
