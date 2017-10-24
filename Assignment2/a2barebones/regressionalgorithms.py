@@ -144,14 +144,14 @@ class RidgeLinearRegression(Regressor):
         # to make the regularization parameter not dependent on numsamples
         numsamples = Xtrain.shape[0] # shape[0] calculates the number of rows, shape[1] calculates the number of columns
         Xless = Xtrain[:,self.params['features']]
-
+        d = Xless.shape[1]
+        I = np.identity(d)
+        # print (I.shape, Xless.shape)
         # For Ridge Regression, add a ridger regularizer
         # lambda = 0.01
-        # Sigular Value Decomposition for Xless, s is the singular values
-        U, s, V = np.linalg.svd(Xless, full_matrices=False)
-        S = np.diag(s)
-        self.weights = np.dot(np.dot(V, np.dot(np.linalg.inv(S), U.T)), ytrain)/numsamples # simple explicitly slove for w
-        
+        # no need to worry about singular value since we are adding lambda*I term which is always greater than 0
+        self.weights = np.dot(np.dot(np.linalg.inv(np.add(np.dot(Xless.T, Xless)/numsamples, 0.01*I)), Xless.T), ytrain)/numsamples # simple explicitly slove for w
+
     def predict(self, Xtest):
         Xless = Xtest[:,self.params['features']]
         ytest = np.dot(Xless, self.weights) + 0.01*np.dot(self.weights,self.weights)

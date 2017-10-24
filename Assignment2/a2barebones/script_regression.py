@@ -20,8 +20,10 @@ def l2err_squared(prediction,ytest):
     return np.square(np.linalg.norm(np.subtract(prediction,ytest)))
 
 def geterror(predictions, ytest):
+    """ mean squared error """
     # Can change this to other error values
-    return (l2err_squared(predictions,ytest)/ytest.shape[0])/2
+    # return (l2err_squared(predictions,ytest)/ytest.shape[0])/2
+    return 0.5*l2err_squared(predictions,ytest)/ytest.shape[0]
 
 
 if __name__ == '__main__':
