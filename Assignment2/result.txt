@@ -1,0 +1,38 @@
+Average error for FSLinearRegression5: 0.489631804152
+Average error for FSLinearRegression50: 0.20822336801
+Average error for FSLinearRegression385: 0.158806443153
+Average error for Random: 0.691169808854
+Average error for Mean: 0.316955686002
+
+
+Error for Mean: 252.307967349
+Standard error for Mean: 7.81675180763e-14
+Average error for FSLinearRegression5: 591.131769603
+Average error for FSLinearRegression50: 106.250056296
+Average error for Random: 1280.24972279
+Average error for Mean: 252.307967349
+
+
+Error for Mean: 243.633694714
+Standard error for Mean: 4.02918024993e-12
+Average error for RidgeLinearRegression: 558.045416221
+Average error for FSLinearRegression5: 578.872492266
+Average error for Random: 1269.7120928
+Average error for Mean: 243.633694714
+
+SVD:
+Error for Mean: 248.569687844
+Standard error for Mean: 2.83534906477e-12
+Average error for FSLinearRegression5: 1350.55406044
+Average error for Random: 1189.87116566
+Average error for FSLinearRegression100: 2.60702621282e+23
+Average error for Mean: 248.569687844
+
+
+Error for Mean: 247.625217316
+Standard error for Mean: 5.00272115688e-12
+Average error for RidgeLinearRegression: 5.31043870088e+44
+Average error for FSLinearRegression5: 1341.14509113
+Average error for Random: 1158.29702029
+Average error for FSLinearRegression385: 1.8783207169e+23
+Average error for Mean: 247.625217316

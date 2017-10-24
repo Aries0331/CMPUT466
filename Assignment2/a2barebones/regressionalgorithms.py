@@ -104,19 +104,20 @@ class FSLinearRegression(Regressor):
         # print (Xless)
 
         # Sigular Value Decomposition for Xless, s is the singular values
-        U, s, V = np.linalg.svd(Xless, full_matrices=True)
-        print(s)
-        # If the sigular value is 0 at the diagonal, force of weight of corresponding feature to be 0
-        # for i in range(len(s)):
-        #     if s[i] == 0:
-        #         self.weights[i] = 0
-        #     else:
-        #         self.weights[i] = np.dot(np.dot(np.linalg.inv(np.dot(Xless[i].T,Xless[i])/numsamples), Xless[i].T),ytrain)/numsamples
+        U, s, V = np.linalg.svd(Xless, full_matrices=False)
+        # print(np.diag(s))
+        # d = len(s)
+        S = np.diag(s)
+        # print(np.linalg.inv(S).shape[0],np.linalg.inv(S).shape[1],U.T.shape[0],U.T.shape[1],V.shape[0],V.shape[1])
 
+        # If the sigular value is 0 at the diagonal, force of weight of corresponding feature to be 0
+        self.weights = np.dot(np.dot(V, np.dot(np.linalg.inv(S), U.T)), ytrain)/numsamples # simple explicitly slove for w
+
+        # self.weights = np.dot(np.dot(np.linalg.pinv(np.dot(Xless.T,Xless)/numsamples), Xless.T),ytrain)/numsamples # simple explicitly slove for w
         # self.weights = np.dot(np.dot(np.linalg.inv(np.dot(Xless.T,Xless)/numsamples), Xless.T),ytrain)/numsamples # simple explicitly slove for w
-        print (self.weights)
+        # print (self.weights)
         # presudoinverse pinv
-        self.weights = np.dot(np.dot(np.linalg.pinv(np.dot(Xless.T,Xless)/numsamples), Xless.T),ytrain)/numsamples # simple explicitly slove for w
+        # self.weights = np.dot(np.dot(np.linalg.pinv(np.dot(Xless.T,Xless)/numsamples), Xless.T),ytrain)/numsamples # simple explicitly slove for w
 
     def predict(self, Xtest):
         Xless = Xtest[:,self.params['features']]
@@ -146,8 +147,11 @@ class RidgeLinearRegression(Regressor):
 
         # For Ridge Regression, add a ridger regularizer
         # lambda = 0.01
-        self.weights = np.dot(np.dot(np.linalg.pinv(np.dot(Xless.T,Xless)/numsamples), Xless.T),ytrain)/numsamples # simple explicitly slove for w
-
+        # Sigular Value Decomposition for Xless, s is the singular values
+        U, s, V = np.linalg.svd(Xless, full_matrices=False)
+        S = np.diag(s)
+        self.weights = np.dot(np.dot(V, np.dot(np.linalg.inv(S), U.T)), ytrain)/numsamples # simple explicitly slove for w
+        
     def predict(self, Xtest):
         Xless = Xtest[:,self.params['features']]
         ytest = np.dot(Xless, self.weights) + 0.01*np.dot(self.weights,self.weights)

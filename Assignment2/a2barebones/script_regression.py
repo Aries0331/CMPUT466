@@ -23,11 +23,6 @@ def geterror(predictions, ytest):
     # Can change this to other error values
     return (l2err_squared(predictions,ytest)/ytest.shape[0])/2
 
-def stderr(predictions, ytest):
-    ''' standard error '''
-    a = np.array(predictions,ytest)
-    std = np.std(a, ddof=1)
-
 
 if __name__ == '__main__':
     trainsize = 1000
@@ -41,8 +36,8 @@ if __name__ == '__main__':
                 # Increase the number of selected features (up to all the features)
                 # 'FSLinearRegression100': algs.FSLinearRegression({'features': range(100)}),
                 # 'FSLinearRegression200': algs.FSLinearRegression({'features': range(200)}),
-                # 'FSLinearRegression385': algs.FSLinearRegression({'features': range(385)}),
-                'RidgeLinearRegression': algs.RidgeLinearRegression({'features': [1,2,3,4,5]}),
+                'FSLinearRegression385': algs.FSLinearRegression({'features': range(385)}),
+                'RidgeLinearRegression': algs.RidgeLinearRegression({'features': range(385)}),
              }
     numalgs = len(regressionalgs)
 
