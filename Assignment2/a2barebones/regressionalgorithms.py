@@ -177,17 +177,28 @@ class LassoRegression(Regressor):
         S = np.diag(s)
         self.weights = np.dot(np.dot(V, np.dot(np.linalg.inv(S), U.T)), ytrain)/numsamples # simple explicitly slove for w
 
+        count = 0
         d = Xless.shape[1]
-        w = np.zeros(d)
+        w = np.zeros([d,1])
+        # print (w.shape)
         err = float('inf')
         tolerance = 10e-5
         stepsize = 0.01
-
-        while np.absolute(obj, err) > tolerance:
-            obj = np.add(np.square(np.subtract(np.dot(Xless, self.weights), ytest))/numsamples, self.weights)
-            gradient = np.dot(Xless.T, np.subtract(np.dot(Xless, self.weights), ytest))/numsamples
+        size = [numsamples, numsamples]
+        temp = np.zeros(size)
+        temp2 = np.diag(self.weights)
+        temp[:temp2.shape[0], :temp2.shape[1]] = temp2
+        # objective
+        obj = np.add(np.dot((np.subtract(np.dot(Xless, self.weights), ytrain)).T, (np.subtract(np.dot(Xless, self.weights), ytrain)))/numsamples, temp)
+        gradient = np.dot(Xless.T, np.subtract(np.dot(Xless, self.weights), ytrain))/numsamples
+        # print (np.dot((np.subtract(np.dot(Xless, self.weights), ytrain)).T, (np.subtract(np.dot(Xless, self.weights), ytrain)))/numsamples)
+        while np.absolute(obj-err).all() > tolerance:
             err = obj
-            self.weights = np.substract(self.weights, 0.01*gradient)
+            self.weights = np.subtract(self.weights, 0.01*gradient)
+            obj = np.add(np.square(np.subtract(np.dot(Xless, self.weights), ytrain))/numsamples, temp)
+            gradient = np.dot(Xless.T, np.subtract(np.dot(Xless, self.weights), ytrain))/numsamples
+            count = count + 1
+        print (count)
 
     def predict(self, Xtest):
         Xless = Xtest[:,self.params['features']]
