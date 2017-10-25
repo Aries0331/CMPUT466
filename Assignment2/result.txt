@@ -54,3 +54,19 @@ Average error for FSLinearRegression5: 1362.42375434
 Average error for LassoRegression5: 1348.85377238
 Average error for Random: 1189.03735145
 Average error for Mean: 252.59891037
+
+count = 195499
+Error for Mean: 245.193048693
+Standard error for Mean: 7.10613800694e-15
+Average error for FSLinearRegression5: 1356.83178203
+Average error for LassoRegression385: 5.60473677434e+19
+Average error for Random: 1160.97123715
+Average error for Mean: 245.193048693
+
+SGD:
+Error for Mean: 250.834081844
+Standard error for Mean: 2.75007540868e-12
+Average error for FSLinearRegression5: 1340.97370473
+Average error for Random: 1291.59786892
+Average error for SGD5: 592.913544344
+Average error for Mean: 250.834081844

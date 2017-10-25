@@ -154,9 +154,10 @@ class RidgeLinearRegression(Regressor):
 
     def predict(self, Xtest):
         Xless = Xtest[:,self.params['features']]
-        ytest = np.dot(Xless, self.weights) + 0.01*np.dot(self.weights,self.weights)
+        ytest = np.dot(Xless, self.weights)
         return ytest
     
+""" Question2 d) """
 class LassoRegression(Regressor):
     """
     Linear Regression with feature selection(FS), and ridge regularization
@@ -199,6 +200,42 @@ class LassoRegression(Regressor):
             gradient = np.dot(Xless.T, np.subtract(np.dot(Xless, self.weights), ytrain))/numsamples
             count = count + 1
         print (count)
+
+    def predict(self, Xtest):
+        Xless = Xtest[:,self.params['features']]
+        ytest = np.dot(Xless, self.weights)
+        return ytest
+
+
+""" Question2 e) """
+class SGD(Regressor):
+
+    def __init__( self, parameters={} ):
+        self.params = {'features': [1,2,3,4,5]} # subselected features
+        self.reset(parameters)
+
+    def learn(self, Xtrain, ytrain):
+        """ Learns using the traindata """
+        # Dividing by numsamples before adding ridge regularization
+        # to make the regularization parameter not dependent on numsamples
+        numsamples = Xtrain.shape[0]
+        Xless = Xtrain[:,self.params['features']]
+
+        U, s, V = np.linalg.svd(Xless, full_matrices=False)
+        S = np.diag(s)
+        self.weights = np.dot(np.dot(V, np.dot(np.linalg.inv(S), U.T)), ytrain)/numsamples # simple explicitly slove for w
+
+        t = 1
+        epochs = 1000
+        stepsize = 0.01
+
+        for i in range (epochs):
+            # shuffle data points from 1, ..., numbersamples
+            arr = np.arange(numsamples)
+            np.random.shuffle(arr)
+            for j in arr:
+                gradient = np.dot(np.subtract(np.dot(Xless[j].T, self.weights), ytrain[j]), Xless[j])
+                self.weights = np.subtract(self.weights, 0.01*gradient)
 
     def predict(self, Xtest):
         Xless = Xtest[:,self.params['features']]
