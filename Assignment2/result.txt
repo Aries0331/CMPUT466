@@ -46,3 +46,11 @@ Average error for FSLinearRegression5: 0.73470637775
 Average error for Random: 0.721175043058
 Average error for FSLinearRegression385: 8366165335.76
 Average error for Mean: 0.313566065133
+
+Lasso:
+Error for Mean: 258.157302862
+Standard error for Mean: 3.65255493557e-12
+Average error for FSLinearRegression5: 1373.09738213
+Average error for LassoRegression5: 1373.09738213
+Average error for Random: 1299.78113127
+Average error for Mean: 258.157302862

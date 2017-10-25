@@ -157,3 +157,39 @@ class RidgeLinearRegression(Regressor):
         ytest = np.dot(Xless, self.weights) + 0.01*np.dot(self.weights,self.weights)
         return ytest
     
+class LassoRegression(Regressor):
+    """
+    Linear Regression with feature selection(FS), and ridge regularization
+    Main linear Regression class
+    """
+    def __init__( self, parameters={} ):
+        self.params = {'features': [1,2,3,4,5]} # subselected features
+        self.reset(parameters)
+
+    def learn(self, Xtrain, ytrain):
+        """ Learns using the traindata """
+        # Dividing by numsamples before adding ridge regularization
+        # to make the regularization parameter not dependent on numsamples
+        numsamples = Xtrain.shape[0]
+        Xless = Xtrain[:,self.params['features']]
+
+        U, s, V = np.linalg.svd(Xless, full_matrices=False)
+        S = np.diag(s)
+        self.weights = np.dot(np.dot(V, np.dot(np.linalg.inv(S), U.T)), ytrain)/numsamples # simple explicitly slove for w
+
+        d = Xless.shape[1]
+        w = np.zeros(d)
+        err = float('inf')
+        tolerance = 10e-5
+        stepsize = 0.01
+
+        while np.absolute(obj, err) > tolerance:
+            obj = np.add(np.square(np.subtract(np.dot(Xless, self.weights), ytest))/numsamples, self.weights)
+            gradient = np.dot(Xless.T, np.subtract(np.dot(Xless, self.weights), ytest))/numsamples
+            err = obj
+            self.weights = np.substract(self.weights, 0.01*gradient)
+
+    def predict(self, Xtest):
+        Xless = Xtest[:,self.params['features']]
+        ytest = np.dot(Xless, self.weights)
+        return ytest
