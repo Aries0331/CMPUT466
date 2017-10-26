@@ -70,3 +70,10 @@ Average error for FSLinearRegression5: 1340.97370473
 Average error for Random: 1291.59786892
 Average error for SGD5: 592.913544344
 Average error for Mean: 250.834081844
+
+Error for Mean: 253.563153315
+Standard error for Mean: 0.0
+Average error for FSLinearRegression5: 1357.1293931
+Average error for SGD385: 1.96027926597e+20
+Average error for Random: 1178.41247453
+Average error for Mean: 253.563153315

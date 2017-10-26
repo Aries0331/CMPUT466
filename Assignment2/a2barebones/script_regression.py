@@ -40,10 +40,10 @@ if __name__ == '__main__':
                 # Increase the number of selected features (up to all the features)
                 # 'FSLinearRegression100': algs.FSLinearRegression({'features': range(100)}),
                 # 'FSLinearRegression200': algs.FSLinearRegression({'features': range(200)}),
-                # 'FSLinearRegression385': algs.FSLinearRegression({'features': range(385)}),
-                # 'RidgeLinearRegression': algs.RidgeLinearRegression({'features': range(385)}),
+                'FSLinearRegression385': algs.FSLinearRegression({'features': range(385)}),
+                'RidgeLinearRegression385': algs.RidgeLinearRegression({'features': range(385)}),
                 # 'LassoRegression385': algs.LassoRegression({'features': range(385)}),
-                'SGD385': algs.SGD({'features': range(385)}),
+                # 'SGD385': algs.SGD({'features': range(385)}),
              }
     numalgs = len(regressionalgs)
 
@@ -73,16 +73,17 @@ if __name__ == '__main__':
                 # Train model
                 learner.learn(trainset[0], trainset[1])
                 # Test model
-                predictions = learner.predict(testset[0])
+                predictions = learner.predict(trainset[0])
                 # print ("predictions:")
                 # print (predictions)
                 # print ("testset")
                 # print (testset[1])
-                error = geterror(testset[1], predictions)
+                error = geterror(trainset[1], predictions)
                 stderr = np.std(predictions,ddof=1)
                 print ('Error for ' + learnername + ': ' + str(error))
                 print ('Standard error for ' + learnername + ': ' + str(stderr))
                 errors[learnername][p,r] = error
+                errors[learnername][p,r] = stderr
 
 
     for learnername in regressionalgs:

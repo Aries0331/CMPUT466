@@ -103,17 +103,18 @@ class FSLinearRegression(Regressor):
         Xless = Xtrain[:,self.params['features']]
         # print (Xless)
 
-        # Sigular Value Decomposition for Xless, s is the singular values
-        U, s, V = np.linalg.svd(Xless, full_matrices=False)
+        # Sigular Value Decomposition for Xless.T * Xless, s is the singular values
+        # U, s, V = np.linalg.svd(np.dot(Xless.T, Xless)/numsamples, full_matrices=False)
         # print(np.diag(s))
         # d = len(s)
-        S = np.diag(s)
+        # S = np.diag(s)
+        # print (np.linalg.inv(S))
         # print(np.linalg.inv(S).shape[0],np.linalg.inv(S).shape[1],U.T.shape[0],U.T.shape[1],V.shape[0],V.shape[1])
 
         # If the sigular value is 0 at the diagonal, force of weight of corresponding feature to be 0
-        self.weights = np.dot(np.dot(V, np.dot(np.linalg.inv(S), U.T)), ytrain)/numsamples # simple explicitly slove for w
-
-        # self.weights = np.dot(np.dot(np.linalg.pinv(np.dot(Xless.T,Xless)/numsamples), Xless.T),ytrain)/numsamples # simple explicitly slove for w
+        # self.weights = np.dot(np.dot(V, np.dot(np.linalg.inv(S), U.T)), ytrain)/numsamples # simple explicitly slove for w
+        # self.weights = np.dot(np.dot(np.dot(V.T, np.dot(np.linalg.inv(S), U.T)), Xless.T), ytrain)/numsamples
+        self.weights = np.dot(np.dot(np.linalg.pinv(np.dot(Xless.T,Xless)/numsamples), Xless.T),ytrain)/numsamples # simple explicitly slove for w
         # self.weights = np.dot(np.dot(np.linalg.inv(np.dot(Xless.T,Xless)/numsamples), Xless.T),ytrain)/numsamples # simple explicitly slove for w
         # print (self.weights)
         # presudoinverse pinv
@@ -174,7 +175,7 @@ class LassoRegression(Regressor):
         numsamples = Xtrain.shape[0]
         Xless = Xtrain[:,self.params['features']]
 
-        U, s, V = np.linalg.svd(Xless, full_matrices=False)
+        U, s, V = np.linalg.svd(np.dot(Xless.T, Xless)/numsamples, full_matrices=False)
         S = np.diag(s)
         self.weights = np.dot(np.dot(V, np.dot(np.linalg.inv(S), U.T)), ytrain)/numsamples # simple explicitly slove for w
 
@@ -223,7 +224,7 @@ class SGD(Regressor):
 
         U, s, V = np.linalg.svd(Xless, full_matrices=False)
         S = np.diag(s)
-        self.weights = np.dot(np.dot(V, np.dot(np.linalg.inv(S), U.T)), ytrain)/numsamples # simple explicitly slove for w
+        self.weights = np.dot(np.dot(np.dot(V.T, np.dot(np.linalg.inv(S), U.T)), Xless.T), ytrain)/numsamples
 
         t = 1
         epochs = 1000
@@ -241,3 +242,51 @@ class SGD(Regressor):
         Xless = Xtest[:,self.params['features']]
         ytest = np.dot(Xless, self.weights)
         return ytest
+
+""" Question2 f) """
+class bachGD(Regressor):
+
+    def __init__( self, parameters={} ):
+        self.params = {'features': [1,2,3,4,5]} # subselected features
+        self.reset(parameters)
+
+    def learn(self, Xtrain, ytrain):
+        """ Learns using the traindata """
+        # Dividing by numsamples before adding ridge regularization
+        # to make the regularization parameter not dependent on numsamples
+        numsamples = Xtrain.shape[0]
+        Xless = Xtrain[:,self.params['features']]
+
+        U, s, V = np.linalg.svd(np.dot(Xless.T, Xless)/numsamples, full_matrices=False)
+        S = np.diag(s)
+        self.weights = np.dot(np.dot(np.dot(V.T, np.dot(np.linalg.inv(S), U.T)), Xless.T), ytrain)/numsamples
+
+        count = 0
+        epochs = 1000
+        d = Xless.shape[1]
+        w = np.zeros([d,1])
+        # print (w.shape)
+        err = float('inf')
+        tolerance = 10e-5
+        stepsize = 0.01
+        size = [numsamples, numsamples]
+        temp = np.zeros(size)
+        temp2 = np.diag(self.weights)
+        temp[:temp2.shape[0], :temp2.shape[1]] = temp2
+        # objective
+        obj = np.add(np.dot((np.subtract(np.dot(Xless, self.weights), ytrain)).T, (np.subtract(np.dot(Xless, self.weights), ytrain)))/numsamples, temp)
+        gradient = np.dot(Xless.T, np.subtract(np.dot(Xless, self.weights), ytrain))/numsamples
+        # print (np.dot((np.subtract(np.dot(Xless, self.weights), ytrain)).T, (np.subtract(np.dot(Xless, self.weights), ytrain)))/numsamples)
+        while np.absolute(obj-err).all() > tolerance:
+            stepsize = 1/(count + 1)
+            err = obj
+            self.weights = np.subtract(self.weights, stepsize*gradient)
+            obj = np.add(np.square(np.subtract(np.dot(Xless, self.weights), ytrain))/numsamples, temp)
+            gradient = np.dot(Xless.T, np.subtract(np.dot(Xless, self.weights), ytrain))/numsamples
+            count = count + 1
+        print (count)
+
+    def predict(self, Xtest):
+        Xless = Xtest[:,self.params['features']]
+        ytest = np.dot(Xless, self.weights)
+        return ytest    
