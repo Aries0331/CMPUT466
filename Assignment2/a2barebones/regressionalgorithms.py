@@ -133,10 +133,10 @@ class RidgeLinearRegression(Regressor):
     Below you will also need to implement other classes for the other algorithms
     """
     def __init__( self, parameters={} ):
-        self.params = {'features': [1,2,3,4,5]}
+        # self.params = {'features': [1,2,3,4,5]}
 
         # Default parameters, any of which can be overwritten by values passed to params
-        # self.params = {'regwgt': 0.5}
+        self.params = {'regwgt': 0.01}
         self.reset(parameters) 
 
     def learn(self, Xtrain, ytrain):
@@ -144,18 +144,18 @@ class RidgeLinearRegression(Regressor):
         # Dividing by numsamples before adding ridge regularization
         # to make the regularization parameter not dependent on numsamples
         numsamples = Xtrain.shape[0] # shape[0] calculates the number of rows, shape[1] calculates the number of columns
-        Xless = Xtrain[:,self.params['features']]
-        d = Xless.shape[1]
+        # Xless = Xtrain[:,self.params['features']]
+        d = Xtrain.shape[1]
         I = np.identity(d)
         # print (I.shape, Xless.shape)
         # For Ridge Regression, add a ridger regularizer
         # lambda = 0.01
         # no need to worry about singular value since we are adding lambda*I term which is always greater than 0
-        self.weights = np.dot(np.dot(np.linalg.inv(np.add(np.dot(Xless.T, Xless)/numsamples, 0.01*I)), Xless.T), ytrain)/numsamples # simple explicitly slove for w
+        self.weights = np.dot(np.dot(np.linalg.inv(np.add(np.dot(Xtrain.T, Xtrain)/numsamples, 0.01*I)), Xtrain.T), ytrain)/numsamples # simple explicitly slove for w
 
     def predict(self, Xtest):
-        Xless = Xtest[:,self.params['features']]
-        ytest = np.dot(Xless, self.weights)
+        # Xless = Xtest[:,self.params['features']]
+        ytest = np.dot(Xtest, self.weights)
         return ytest
     
 """ Question2 d) """
@@ -175,9 +175,10 @@ class LassoRegression(Regressor):
         numsamples = Xtrain.shape[0]
         Xless = Xtrain[:,self.params['features']]
 
-        U, s, V = np.linalg.svd(np.dot(Xless.T, Xless)/numsamples, full_matrices=False)
-        S = np.diag(s)
-        self.weights = np.dot(np.dot(V, np.dot(np.linalg.inv(S), U.T)), ytrain)/numsamples # simple explicitly slove for w
+        # U, s, V = np.linalg.svd(np.dot(Xless.T, Xless)/numsamples, full_matrices=False)
+        # S = np.diag(s)
+        # self.weights = np.dot(np.dot(V, np.dot(np.linalg.inv(S), U.T)), ytrain)/numsamples # simple explicitly slove for w
+        self.weights = np.dot(np.dot(np.linalg.pinv(np.dot(Xless.T,Xless)/numsamples), Xless.T),ytrain)/numsamples
 
         count = 0
         d = Xless.shape[1]
