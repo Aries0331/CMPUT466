@@ -174,14 +174,15 @@ class LassoRegression(Regressor):
         # print(weight)
         # print(weight[1])
         for i in range (weight.shape[0]):
-            if self.weights[i] > 0.01*stepsize:
-                self.weights[i] = self.weights[i] - 0.01*stepsize
+            # print (weight[i])
+            if weight[i] > 0.01*stepsize:
+                self.weights[i] = weight[i] - 0.01*stepsize
                 # print (self.weights[i])
-            elif np.absolute(self.weights[i]) <= 0.01*stepsize:
+            elif np.absolute(weight[i]) <= 0.01*stepsize:
                 self.weights[i] = 0
                 # print (self.weights[i])
-            elif self.weights[i] < -0.01*stepsize:
-                self.weights[i] = self.weights[i] + 0.01*stepsize
+            elif weight[i] < -0.01*stepsize:
+                self.weights[i] = weight[i] + 0.01*stepsize
                 # print (self.weights[i])
 
     def learn(self, Xtrain, ytrain):
@@ -194,14 +195,14 @@ class LassoRegression(Regressor):
         # U, s, V = np.linalg.svd(np.dot(Xless.T, Xless)/numsamples, full_matrices=False)
         # S = np.diag(s)
         # self.weights = np.dot(np.dot(V, np.dot(np.linalg.inv(S), U.T)), ytrain)/numsamples # simple explicitly slove for w
-        self.weights = np.dot(np.dot(np.linalg.pinv(np.dot(Xtrain.T, Xtrain)/numsamples), Xtrain.T),ytrain)/numsamples
-        # print (self.weights)
+        # self.weights = np.dot(np.dot(np.linalg.pinv(np.dot(Xtrain.T, Xtrain)/numsamples), Xtrain.T),ytrain)/numsamples
+        # print (self.weights.shape)
         count = 0
-        d = Xtrain.shape[1]
-        w = np.zeros([d,1])
-        # print (w.shape)
+        # d = Xtrain.shape[1]
+        self.weights = np.zeros([385,])
+        # print (self.weights.shape)
         err = float('inf')
-        tolerance = 10e-5
+        tolerance = 10e-4
         XX = np.dot(Xtrain.T, Xtrain)/numsamples
         Xy = np.dot(Xtrain.T, ytrain)/numsamples
         # print (XX.shape, Xy.shape)
@@ -210,16 +211,6 @@ class LassoRegression(Regressor):
             for j in range (Xtrain.shape[1]):
                 sum = np.square(Xtrain[i][j]) + sum
         stepsize = 1/(2*np.sqrt(sum))
-        # print(stepsize, stepsize.shape)
-        # size = [numsamples, numsamples]
-        # temp = np.zeros(size)
-        # temp2 = np.diag(self.weights)
-        # temp[:temp2.shape[0], :temp2.shape[1]] = temp2
-        # objective
-        # obj = np.add(np.dot((np.subtract(np.dot(Xless, self.weights), ytrain)).T, (np.subtract(np.dot(Xless, self.weights), ytrain)))/numsamples, temp)
-        # gradient = np.dot(Xless.T, np.subtract(np.dot(Xless, self.weights), ytrain))/numsamples
-        # print (np.dot((np.subtract(np.dot(Xless, self.weights), ytrain)).T, (np.subtract(np.dot(Xless, self.weights), ytrain)))/numsamples)
-        # print(Xtrain.shape, self.weights.shape)
         c_w = script.geterror(np.dot(Xtrain, self.weights), ytrain)
         while np.absolute(c_w-err) > tolerance:
             err = c_w
@@ -227,8 +218,6 @@ class LassoRegression(Regressor):
             # print (var)
             self.prox(var, stepsize)
             c_w = script.geterror(np.dot(Xtrain, self.weights), ytrain)
-            # obj = np.add(np.square(np.subtract(np.dot(Xless, self.weights), ytrain))/numsamples, temp)
-            # gradient = np.dot(Xless.T, np.subtract(np.dot(Xless, self.weights), ytrain))/numsamples
             # count = count + 1
         # print (self.weights)
 
@@ -242,7 +231,7 @@ class LassoRegression(Regressor):
 class SGD(Regressor):
 
     def __init__( self, parameters={} ):
-        self.params = {'features': [1,2,3,4,5]} # subselected features
+        self.params = {'regwgt': 0.01} # subselected features
         self.reset(parameters)
 
     def learn(self, Xtrain, ytrain):
@@ -250,11 +239,12 @@ class SGD(Regressor):
         # Dividing by numsamples before adding ridge regularization
         # to make the regularization parameter not dependent on numsamples
         numsamples = Xtrain.shape[0]
-        Xless = Xtrain[:,self.params['features']]
+        # Xless = Xtrain[:,self.params['features']]
 
-        U, s, V = np.linalg.svd(Xless, full_matrices=False)
-        S = np.diag(s)
-        self.weights = np.dot(np.dot(np.dot(V.T, np.dot(np.linalg.inv(S), U.T)), Xless.T), ytrain)/numsamples
+        # U, s, V = np.linalg.svd(Xless, full_matrices=False)
+        # S = np.diag(s)
+        # self.weights = np.dot(np.dot(np.linalg.pinv(np.dot(Xtrain.T, Xtrain)/numsamples), Xtrain.T),ytrain)/numsamples
+        self.weights = np.zeros([385,])
 
         t = 1
         epochs = 1000
@@ -264,57 +254,69 @@ class SGD(Regressor):
             # shuffle data points from 1, ..., numbersamples
             arr = np.arange(numsamples)
             np.random.shuffle(arr)
-            for j in arr:
-                gradient = np.dot(np.subtract(np.dot(Xless[j].T, self.weights), ytrain[j]), Xless[j])
-                self.weights = np.subtract(self.weights, 0.01*gradient)
+            for j in range(numsamples):
+                gradient = np.dot(np.subtract(np.dot(Xtrain[arr[j]].T, self.weights), ytrain[arr[j]]), Xtrain[arr[j]])
+                # print (gradient)
+                self.weights = np.subtract(self.weights, stepsize*gradient)
+                # print(self.weights)
 
     def predict(self, Xtest):
-        Xless = Xtest[:,self.params['features']]
-        ytest = np.dot(Xless, self.weights)
+        # Xless = Xtest[:,self.params['features']]
+        ytest = np.dot(Xtest, self.weights)
         return ytest
 
 """ Question2 f) """
 class bachGD(Regressor):
 
     def __init__( self, parameters={} ):
-        self.params = {'features': [1,2,3,4,5]} # subselected features
+        self.params = {'regwgt': 0.01} # subselected features
         self.reset(parameters)
+
+    def lineSearch(slef, weight_t, gradient, cost):
+
+        stepsize_max = 1.0
+        t = 0.7
+        tolerance = 10e-4
+        stepsize = stepsize_max
+        weight = weight_t
+        obj = cost
+        # while :
+        #     weight = weight_t - stepsize * gradient
+        #     if (cost < obj-tolerance):
+        #         break
+        #     stepsize = t * stepsize
+        # if :
+        #     return weight_t, stepsize = 0
+        # return weight, stepsize
 
     def learn(self, Xtrain, ytrain):
         """ Learns using the traindata """
         # Dividing by numsamples before adding ridge regularization
         # to make the regularization parameter not dependent on numsamples
         numsamples = Xtrain.shape[0]
-        Xless = Xtrain[:,self.params['features']]
+        # Xless = Xtrain[:,self.params['features']]
 
-        U, s, V = np.linalg.svd(np.dot(Xless.T, Xless)/numsamples, full_matrices=False)
-        S = np.diag(s)
-        self.weights = np.dot(np.dot(np.dot(V.T, np.dot(np.linalg.inv(S), U.T)), Xless.T), ytrain)/numsamples
+        # U, s, V = np.linalg.svd(np.dot(Xless.T, Xless)/numsamples, full_matrices=False)
+        # S = np.diag(s)
+        # self.weights = np.dot(np.dot(np.linalg.pinv(np.dot(Xtrain.T, Xtrain)/numsamples), Xtrain.T),ytrain)/numsamples
+        self.weights = np.zeros([385,])
 
         count = 0
-        epochs = 1000
-        d = Xless.shape[1]
-        w = np.zeros([d,1])
         # print (w.shape)
         err = float('inf')
-        tolerance = 10e-5
+        tolerance = 10e-4
         stepsize = 0.01
-        size = [numsamples, numsamples]
-        temp = np.zeros(size)
-        temp2 = np.diag(self.weights)
-        temp[:temp2.shape[0], :temp2.shape[1]] = temp2
-        # objective
-        obj = np.add(np.dot((np.subtract(np.dot(Xless, self.weights), ytrain)).T, (np.subtract(np.dot(Xless, self.weights), ytrain)))/numsamples, temp)
-        gradient = np.dot(Xless.T, np.subtract(np.dot(Xless, self.weights), ytrain))/numsamples
+   
+        c_w = script.geterror(np.dot(Xtrain, self.weights), ytrain)
+        # gradient = np.dot(Xless.T, np.subtract(np.dot(Xless, self.weights), ytrain))/numsamples
         # print (np.dot((np.subtract(np.dot(Xless, self.weights), ytrain)).T, (np.subtract(np.dot(Xless, self.weights), ytrain)))/numsamples)
-        while np.absolute(obj-err).all() > tolerance:
-            stepsize = 1/(count + 1)
-            err = obj
+        while np.absolute(c_w-err) > tolerance:
+            err = c_w
+            gradient = np.dot(Xtrain.T, np.subtract(np.dot(Xtrain, self.weights), ytrain))/numsamples
             self.weights = np.subtract(self.weights, stepsize*gradient)
-            obj = np.add(np.square(np.subtract(np.dot(Xless, self.weights), ytrain))/numsamples, temp)
-            gradient = np.dot(Xless.T, np.subtract(np.dot(Xless, self.weights), ytrain))/numsamples
-            count = count + 1
-        print (count)
+            c_w = script.geterror(np.dot(Xtrain, self.weights), ytrain)
+            # count = count + 1
+        # print (count)
 
     def predict(self, Xtest):
         Xless = Xtest[:,self.params['features']]

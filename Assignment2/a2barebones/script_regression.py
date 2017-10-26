@@ -33,7 +33,7 @@ if __name__ == '__main__':
 
     regressionalgs = {'Random': algs.Regressor(),
                 'Mean': algs.MeanPredictor(),
-                'FSLinearRegression5': algs.FSLinearRegression({'features': [1,2,3,4,5]}),
+                # 'FSLinearRegression5': algs.FSLinearRegression({'features': [1,2,3,4,5]}),
                 # 'LassoRegression5': algs.LassoRegression({'features': [1,2,3,4,5]}),
                 # 'SGD5': algs.SGD({'features': [1,2,3,4,5]}),
                 # 'FSLinearRegression50': algs.FSLinearRegression({'features': range(50)}),
@@ -41,9 +41,9 @@ if __name__ == '__main__':
                 # 'FSLinearRegression100': algs.FSLinearRegression({'features': range(100)}),
                 # 'FSLinearRegression200': algs.FSLinearRegression({'features': range(200)}),
                 'FSLinearRegression385': algs.FSLinearRegression({'features': range(385)}),
-                'RidgeLinearRegression385': algs.RidgeLinearRegression(),
-                'LassoRegression385': algs.LassoRegression(),
-                # 'SGD385': algs.SGD({'features': range(385)}),
+                # 'RidgeLinearRegression385': algs.RidgeLinearRegression(),
+                # 'LassoRegression385': algs.LassoRegression(),
+                'SGD385': algs.SGD(),
              }
     numalgs = len(regressionalgs)
 
