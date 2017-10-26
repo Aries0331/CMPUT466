@@ -41,8 +41,8 @@ if __name__ == '__main__':
                 # 'FSLinearRegression100': algs.FSLinearRegression({'features': range(100)}),
                 # 'FSLinearRegression200': algs.FSLinearRegression({'features': range(200)}),
                 'FSLinearRegression385': algs.FSLinearRegression({'features': range(385)}),
-                'RidgeLinearRegression385': algs.RidgeLinearRegression({'features': range(385)}),
-                # 'LassoRegression385': algs.LassoRegression({'features': range(385)}),
+                'RidgeLinearRegression385': algs.RidgeLinearRegression(),
+                'LassoRegression385': algs.LassoRegression(),
                 # 'SGD385': algs.SGD({'features': range(385)}),
              }
     numalgs = len(regressionalgs)
