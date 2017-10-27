@@ -250,6 +250,8 @@ class SGD(Regressor):
         epochs = 1000
         stepsize = 0.01
 
+        xaxis = np.zeros(1000) 
+
         for i in range (epochs):
             # shuffle data points from 1, ..., numbersamples
             arr = np.arange(numsamples)
@@ -257,8 +259,12 @@ class SGD(Regressor):
             for j in arr:
                 gradient = np.dot(np.subtract(np.dot(Xtrain[arr[j]].T, self.weights), ytrain[arr[j]]), Xtrain[arr[j]])
                 # print (gradient)
+                stepsize = 0.01/(1+i)
                 self.weights = np.subtract(self.weights, stepsize*gradient)
                 # print(self.weights)
+
+            xaxis[i] = script.geterror(np.dot(Xtrain, self.weights), ytrain)
+        return xaxis
 
     def predict(self, Xtest):
         # Xless = Xtest[:,self.params['features']]

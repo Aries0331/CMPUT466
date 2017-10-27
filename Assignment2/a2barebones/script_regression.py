@@ -30,7 +30,7 @@ def geterror(predictions, ytest):
 if __name__ == '__main__':
     trainsize = 1000
     testsize = 5000
-    numruns = 5
+    numruns = 1
 
     regressionalgs = {'Random': algs.Regressor(),
                 'Mean': algs.MeanPredictor(),
@@ -44,7 +44,7 @@ if __name__ == '__main__':
                 # 'RidgeLinearRegression385': algs.RidgeLinearRegression(),
                 # 'LassoRegression385': algs.LassoRegression(),
                 'SGD385': algs.SGD(),
-                'batchGD385': algs.batchGD(),
+                # 'batchGD385': algs.batchGD(),
              }
     numalgs = len(regressionalgs)
 
@@ -56,11 +56,12 @@ if __name__ == '__main__':
         {'regwgt': 1.0},
                       )
     numparams = len(parameters)
-    
+
     errors = {}
     for learnername in regressionalgs:
         errors[learnername] = np.zeros((numparams,numruns))
 
+    x = {}
     for r in range(numruns):
         trainset, testset = dtl.load_ctscan(trainsize,testsize)
         print(('Running on train={0} and test={1} samples for run {2}').format(trainset[0].shape[0], testset[0].shape[0],r))
@@ -75,15 +76,18 @@ if __name__ == '__main__':
                 learner.learn(trainset[0], trainset[1])
                 # Test model
                 predictions = learner.predict(trainset[0])
-                # print ("predictions:")
-                # print (predictions)
-                # print ("testset")
-                # print (testset[1])
+                x[learnername][r] = learner.learn(trainset[0], trainset[1]) + x[learnername][r-1] 
                 error = geterror(trainset[1], predictions)
                 # stderr = np.std(predictions,ddof=1)
                 print ('Error for ' + learnername + ': ' + str(error))
                 errors[learnername][p,r] = error
                 # errors[learnername][p,r] = stderr
+
+    # draw plot
+    # For SGD
+    y = np.arange(1000)
+    plt.plot(x,y)
+    plt.show()
 
     """ standarad error calculation """
     for learnername in regressionalgs:
@@ -93,17 +97,11 @@ if __name__ == '__main__':
             for r in range(numruns):
                 sum_ = sum_ + errors[learnername][p,r]
             mean = sum_/numruns
+            print ('Average error for ' + learnername + ': ' + str(mean))
             for r in range(numruns):
                 std = std + (errors[learnername][p,r] - mean)**2
             stderr = np.sqrt(std/numruns-1)/np.sqrt(numruns)
             print ('Standard error for ' + learnername + ': ' + str(stderr))
-    # for learnername in regressionalgs.items():
-    #     sum_ = errors[learnername][p,:] + sum_
-    #     mean = sum_/numparams
-    # for learnername in regressionalgs.items():
-    #     std = std + (errors[learnername][p,:] - mean)**2
-    #     stderr = np.sqrt(std/numruns-1)
-    #     print ('Standard error for ' + learnername + ': ' + str(stderr))
 
     for learnername in regressionalgs:
         besterror = np.mean(errors[learnername][0,:])
@@ -119,5 +117,3 @@ if __name__ == '__main__':
         #print ('Best parameters for ' + learnername + ': ' + str(learner.getparams()))
         print ('Average error for ' + learnername + ': ' + str(besterror))
 
-    # report the standard error, 
-    # i.e. the sample standard deviation divided by the square root of the number of runs.
