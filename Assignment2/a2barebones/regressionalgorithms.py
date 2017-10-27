@@ -137,7 +137,7 @@ class RidgeLinearRegression(Regressor):
         # self.params = {'features': [1,2,3,4,5]}
 
         # Default parameters, any of which can be overwritten by values passed to params
-        self.params = {'regwgt': 0.01}
+        self.params = {'regwgt': 0.0, 'regwgt': 0.01, 'regwgt': 1.0}
         self.reset(parameters) 
 
     def learn(self, Xtrain, ytrain):
@@ -152,7 +152,7 @@ class RidgeLinearRegression(Regressor):
         # For Ridge Regression, add a ridger regularizer
         # lambda = 0.01
         # no need to worry about singular value since we are adding lambda*I term which is always greater than 0
-        self.weights = np.dot(np.dot(np.linalg.inv(np.add(np.dot(Xtrain.T, Xtrain)/numsamples, 0.01*I)), Xtrain.T), ytrain)/numsamples # simple explicitly slove for w
+        self.weights = np.dot(np.dot(np.linalg.pinv(np.add(np.dot(Xtrain.T, Xtrain)/numsamples, self.params['regwgt']*I)), Xtrain.T), ytrain)/numsamples # simple explicitly slove for w
 
     def predict(self, Xtest):
         # Xless = Xtest[:,self.params['features']]
@@ -167,7 +167,7 @@ class LassoRegression(Regressor):
     """
     def __init__( self, parameters={} ):
         # self.params = {'features': [1,2,3,4,5]} # subselected features
-        self.params = {'regwgt': 0.01}
+        self.params = {'regwgt': 0.0, 'regwgt': 0.01, 'regwgt': 1.0}
         self.reset(parameters)
 
     def prox(self, weight, stepsize):
@@ -231,7 +231,7 @@ class LassoRegression(Regressor):
 class SGD(Regressor):
 
     def __init__( self, parameters={} ):
-        self.params = {'regwgt': 0.01} # subselected features
+        self.params = {'regwgt': 0.0, 'regwgt': 0.01, 'regwgt': 1.0} # subselected features
         self.reset(parameters)
 
     def learn(self, Xtrain, ytrain):
@@ -269,7 +269,7 @@ class SGD(Regressor):
 class batchGD(Regressor):
 
     def __init__( self, parameters={} ):
-        self.params = {'regwgt': 0.01}
+        self.params = {'regwgt': 0.0, 'regwgt': 0.01, 'regwgt': 1.0}
         self.reset(parameters)
 
     def lineSearch(slef, Xtrain, ytrain, weight_t, gradient, cost):
@@ -281,7 +281,7 @@ class batchGD(Regressor):
         stepsize = stepsize_max
         weight = weight_t.copy()
         obj = cost.copy()
-        max_interation = 1000
+        max_interation = 100
         i = 0
         while i < max_interation:
             weight = weight_t - stepsize * gradient
@@ -328,8 +328,8 @@ class batchGD(Regressor):
             c_w = script.geterror(np.dot(Xtrain, self.weights), ytrain)
             self.weights = self.weights - stepsize*gradient
             # print(self.weights)
-            # count = count + 1
-        # print (count)
+            count = count + 1
+        print (count)
 
     def predict(self, Xtest):
         # Xless = Xtest[:,self.params['features']]

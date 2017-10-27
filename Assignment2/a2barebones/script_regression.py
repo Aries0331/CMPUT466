@@ -3,6 +3,7 @@ import csv
 import random
 import math
 import numpy as np
+import matplotlib.pyplot as plt
 
 import dataloader as dtl
 import regressionalgorithms as algs
@@ -39,10 +40,10 @@ if __name__ == '__main__':
                 # Increase the number of selected features (up to all the features)
                 # 'FSLinearRegression100': algs.FSLinearRegression({'features': range(100)}),
                 # 'FSLinearRegression200': algs.FSLinearRegression({'features': range(200)}),
-                'FSLinearRegression385': algs.FSLinearRegression({'features': range(385)}),
-                'RidgeLinearRegression385': algs.RidgeLinearRegression(),
-                'LassoRegression385': algs.LassoRegression(),
-                # 'SGD385': algs.SGD(),
+                # 'FSLinearRegression385': algs.FSLinearRegression({'features': range(385)}),
+                # 'RidgeLinearRegression385': algs.RidgeLinearRegression(),
+                # 'LassoRegression385': algs.LassoRegression(),
+                'SGD385': algs.SGD(),
                 'batchGD385': algs.batchGD(),
              }
     numalgs = len(regressionalgs)
@@ -79,21 +80,30 @@ if __name__ == '__main__':
                 # print ("testset")
                 # print (testset[1])
                 error = geterror(trainset[1], predictions)
-                stderr = np.std(predictions,ddof=1)
+                # stderr = np.std(predictions,ddof=1)
                 print ('Error for ' + learnername + ': ' + str(error))
-                print ('Standard error for ' + learnername + ': ' + str(stderr))
                 errors[learnername][p,r] = error
-                errors[learnername][p,r] = stderr
+                # errors[learnername][p,r] = stderr
 
-            """ standarad error calculation """
-            # sum = 0
-            # std = 0
-            # for learnername in regressionalgs.items():
-            #     sum = errors[learnername][p,r] + sum
-            # mean = sum/numparams
-            # for learnername in regressionalgs.items():
-            #     std = 
-
+    """ standarad error calculation """
+    for learnername in regressionalgs:
+        sum_ = 0
+        std = 0
+        for p in range(numparams):
+            for r in range(numruns):
+                sum_ = sum_ + errors[learnername][p,r]
+            mean = sum_/numruns
+            for r in range(numruns):
+                std = std + (errors[learnername][p,r] - mean)**2
+            stderr = np.sqrt(std/numruns-1)/np.sqrt(numruns)
+            print ('Standard error for ' + learnername + ': ' + str(stderr))
+    # for learnername in regressionalgs.items():
+    #     sum_ = errors[learnername][p,:] + sum_
+    #     mean = sum_/numparams
+    # for learnername in regressionalgs.items():
+    #     std = std + (errors[learnername][p,:] - mean)**2
+    #     stderr = np.sqrt(std/numruns-1)
+    #     print ('Standard error for ' + learnername + ': ' + str(stderr))
 
     for learnername in regressionalgs:
         besterror = np.mean(errors[learnername][0,:])
