@@ -254,7 +254,7 @@ class SGD(Regressor):
             # shuffle data points from 1, ..., numbersamples
             arr = np.arange(numsamples)
             np.random.shuffle(arr)
-            for j in range(numsamples):
+            for j in arr:
                 gradient = np.dot(np.subtract(np.dot(Xtrain[arr[j]].T, self.weights), ytrain[arr[j]]), Xtrain[arr[j]])
                 # print (gradient)
                 self.weights = np.subtract(self.weights, stepsize*gradient)
@@ -266,28 +266,38 @@ class SGD(Regressor):
         return ytest
 
 """ Question2 f) """
-class bachGD(Regressor):
+class batchGD(Regressor):
 
     def __init__( self, parameters={} ):
-        self.params = {'regwgt': 0.01} # subselected features
+        self.params = {'regwgt': 0.01}
         self.reset(parameters)
 
-    def lineSearch(slef, weight_t, gradient, cost):
+    def lineSearch(slef, Xtrain, ytrain, weight_t, gradient, cost):
 
+        numsamples = Xtrain.shape[0]
         stepsize_max = 1.0
-        t = 0.7
+        t = 0.5 # stepsize reduces more quickly
         tolerance = 10e-4
         stepsize = stepsize_max
-        weight = weight_t
-        obj = cost
-        # while :
-        #     weight = weight_t - stepsize * gradient
-        #     if (cost < obj-tolerance):
-        #         break
-        #     stepsize = t * stepsize
-        # if :
-        #     return weight_t, stepsize = 0
-        # return weight, stepsize
+        weight = weight_t.copy()
+        obj = cost.copy()
+        max_interation = 1000
+        i = 0
+        while i < max_interation:
+            weight = weight_t - stepsize * gradient
+            cost = script.geterror(np.dot(Xtrain, weight), ytrain)
+            gradient = np.dot(Xtrain.T, np.subtract(np.dot(Xtrain, weight), ytrain))/numsamples
+            if (cost < obj-tolerance):
+                break
+            else:
+                # print ("else")
+                stepsize = t * stepsize
+            i = i + 1
+        if i == max_interation:
+            # print ("i")
+            stepsize = 0
+            return weight_t, stepsize 
+        return weight, stepsize
 
     def learn(self, Xtrain, ytrain):
         """ Learns using the traindata """
@@ -304,7 +314,7 @@ class bachGD(Regressor):
         count = 0
         # print (w.shape)
         err = float('inf')
-        tolerance = 10e-4
+        tolerance = 10e-6
         stepsize = 0.01
    
         c_w = script.geterror(np.dot(Xtrain, self.weights), ytrain)
@@ -313,12 +323,15 @@ class bachGD(Regressor):
         while np.absolute(c_w-err) > tolerance:
             err = c_w
             gradient = np.dot(Xtrain.T, np.subtract(np.dot(Xtrain, self.weights), ytrain))/numsamples
-            self.weights = np.subtract(self.weights, stepsize*gradient)
+            self.weights, stepsize = self.lineSearch(Xtrain, ytrain, self.weights, gradient, c_w)
+            # print(self.weights)
             c_w = script.geterror(np.dot(Xtrain, self.weights), ytrain)
+            self.weights = self.weights - stepsize*gradient
+            # print(self.weights)
             # count = count + 1
         # print (count)
 
     def predict(self, Xtest):
-        Xless = Xtest[:,self.params['features']]
-        ytest = np.dot(Xless, self.weights)
+        # Xless = Xtest[:,self.params['features']]
+        ytest = np.dot(Xtest, self.weights)
         return ytest    
