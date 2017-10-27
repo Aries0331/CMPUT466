@@ -29,7 +29,7 @@ def geterror(predictions, ytest):
 if __name__ == '__main__':
     trainsize = 1000
     testsize = 5000
-    numruns = 1
+    numruns = 5
 
     regressionalgs = {'Random': algs.Regressor(),
                 'Mean': algs.MeanPredictor(),
@@ -40,8 +40,8 @@ if __name__ == '__main__':
                 # 'FSLinearRegression100': algs.FSLinearRegression({'features': range(100)}),
                 # 'FSLinearRegression200': algs.FSLinearRegression({'features': range(200)}),
                 'FSLinearRegression385': algs.FSLinearRegression({'features': range(385)}),
-                # 'RidgeLinearRegression385': algs.RidgeLinearRegression(),
-                # 'LassoRegression385': algs.LassoRegression(),
+                'RidgeLinearRegression385': algs.RidgeLinearRegression(),
+                'LassoRegression385': algs.LassoRegression(),
                 # 'SGD385': algs.SGD(),
                 'batchGD385': algs.batchGD(),
              }
@@ -84,6 +84,15 @@ if __name__ == '__main__':
                 print ('Standard error for ' + learnername + ': ' + str(stderr))
                 errors[learnername][p,r] = error
                 errors[learnername][p,r] = stderr
+
+            """ standarad error calculation """
+            # sum = 0
+            # std = 0
+            # for learnername in regressionalgs.items():
+            #     sum = errors[learnername][p,r] + sum
+            # mean = sum/numparams
+            # for learnername in regressionalgs.items():
+            #     std = 
 
 
     for learnername in regressionalgs:

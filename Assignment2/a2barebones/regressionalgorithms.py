@@ -206,11 +206,11 @@ class LassoRegression(Regressor):
         XX = np.dot(Xtrain.T, Xtrain)/numsamples
         Xy = np.dot(Xtrain.T, ytrain)/numsamples
         # print (XX.shape, Xy.shape)
-        sum = 0
+        sum_ = 0
         for i in range (Xtrain.shape[0]):
             for j in range (Xtrain.shape[1]):
-                sum = np.square(Xtrain[i][j]) + sum
-        stepsize = 1/(2*np.sqrt(sum))
+                sum_ = np.square(Xtrain[i][j]) + sum_
+        stepsize = 1/(2*np.sqrt(sum_))
         c_w = script.geterror(np.dot(Xtrain, self.weights), ytrain)
         while np.absolute(c_w-err) > tolerance:
             err = c_w
