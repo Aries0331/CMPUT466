@@ -30,7 +30,7 @@ def geterror(predictions, ytest):
 if __name__ == '__main__':
     trainsize = 1000
     testsize = 5000
-    numruns = 1
+    numruns = 5
 
     regressionalgs = {'Random': algs.Regressor(),
                 'Mean': algs.MeanPredictor(),
@@ -40,11 +40,11 @@ if __name__ == '__main__':
                 # Increase the number of selected features (up to all the features)
                 # 'FSLinearRegression100': algs.FSLinearRegression({'features': range(100)}),
                 # 'FSLinearRegression200': algs.FSLinearRegression({'features': range(200)}),
-                # 'FSLinearRegression385': algs.FSLinearRegression({'features': range(385)}),
-                # 'RidgeLinearRegression385': algs.RidgeLinearRegression(),
-                # 'LassoRegression385': algs.LassoRegression(),
+                'FSLinearRegression385': algs.FSLinearRegression({'features': range(385)}),
+                'RidgeLinearRegression385': algs.RidgeLinearRegression(),
+                'LassoRegression385': algs.LassoRegression(),
                 'SGD385': algs.SGD(),
-                # 'batchGD385': algs.batchGD(),
+                'batchGD385': algs.batchGD(),
              }
     numalgs = len(regressionalgs)
 
@@ -58,10 +58,13 @@ if __name__ == '__main__':
     numparams = len(parameters)
 
     errors = {}
+    # initialize for x and y axis
+    x = {}
+    y = {}
+
     for learnername in regressionalgs:
         errors[learnername] = np.zeros((numparams,numruns))
 
-    x = {}
     for r in range(numruns):
         trainset, testset = dtl.load_ctscan(trainsize,testsize)
         print(('Running on train={0} and test={1} samples for run {2}').format(trainset[0].shape[0], testset[0].shape[0],r))
@@ -76,18 +79,13 @@ if __name__ == '__main__':
                 learner.learn(trainset[0], trainset[1])
                 # Test model
                 predictions = learner.predict(trainset[0])
-                x[learnername][r] = learner.learn(trainset[0], trainset[1]) + x[learnername][r-1] 
+                # get return value of errors from each regression function 
+                y[learnername] = learner.data()
                 error = geterror(trainset[1], predictions)
                 # stderr = np.std(predictions,ddof=1)
                 print ('Error for ' + learnername + ': ' + str(error))
                 errors[learnername][p,r] = error
                 # errors[learnername][p,r] = stderr
-
-    # draw plot
-    # For SGD
-    y = np.arange(1000)
-    plt.plot(x,y)
-    plt.show()
 
     """ standarad error calculation """
     for learnername in regressionalgs:
@@ -116,4 +114,17 @@ if __name__ == '__main__':
         learner.reset(parameters[bestparams])
         #print ('Best parameters for ' + learnername + ': ' + str(learner.getparams()))
         print ('Average error for ' + learnername + ': ' + str(besterror))
+
+    """ Draw plot of error versus epoches for SGD and BGD """
+    x['SGD385'] = np.arange(1000) # total 1000 epochs for SGD
+    x['batchGD385'] = np.arange(5000) # limit 5000 interations for BGD in case the x-axis goes to far
+    plt.plot(x['SGD385'], y["SGD385"], label='StochasticGradientDescent')
+    plt.plot(x['batchGD385'], y["batchGD385"], label='BatchGradientDescent')
+    plt.xlabel('Number of Epoches')
+    plt.ylabel('Mean Squared Error')
+    plt.title('MSE VS Epoches for BGD and SGD')
+    # plt.xlim([0,5000])
+    plt.ylim([20,350]) 
+    plt.legend()
+    plt.show()
 

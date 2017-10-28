@@ -4,6 +4,7 @@ import math
 
 import utilities as utils
 import script_regression as script
+import matplotlib.pyplot as plt
 
 class Regressor:
     """
@@ -15,6 +16,7 @@ class Regressor:
         """ Params can contain any useful parameters for the algorithm """
         self.params = {}
         self.reset(parameters)
+        self.yaxis = np.zeros(0)
 
     def reset(self, parameters):
         """ Reset learner """
@@ -42,6 +44,9 @@ class Regressor:
         """ Most regressors return a dot product for the prediction """
         ytest = np.dot(Xtest, self.weights)
         return ytest
+
+    def data(self):
+        self.yaxis = np.zeros(0)
 
 class RangePredictor(Regressor):
     """
@@ -115,17 +120,20 @@ class FSLinearRegression(Regressor):
         # If the sigular value is 0 at the diagonal, force of weight of corresponding feature to be 0
         # self.weights = np.dot(np.dot(V, np.dot(np.linalg.inv(S), U.T)), ytrain)/numsamples # simple explicitly slove for w
         # self.weights = np.dot(np.dot(np.dot(V.T, np.dot(np.linalg.inv(S), U.T)), Xless.T), ytrain)/numsamples
+
+        # use presudoinverse pinv instead to handle singular matrix
         self.weights = np.dot(np.dot(np.linalg.pinv(np.dot(Xless.T,Xless)/numsamples), Xless.T),ytrain)/numsamples # simple explicitly slove for w
+        
         # self.weights = np.dot(np.dot(np.linalg.inv(np.dot(Xless.T,Xless)/numsamples), Xless.T),ytrain)/numsamples # simple explicitly slove for w
         # print (self.weights)
-        # presudoinverse pinv
-        # self.weights = np.dot(np.dot(np.linalg.pinv(np.dot(Xless.T,Xless)/numsamples), Xless.T),ytrain)/numsamples # simple explicitly slove for w
+        # self.weights = np.dot(np.dot(np.linalg.inv(np.dot(Xless.T,Xless)/numsamples), Xless.T),ytrain)/numsamples # simple explicitly slove for w
 
     def predict(self, Xtest):
         Xless = Xtest[:,self.params['features']]
         ytest = np.dot(Xless, self.weights)
         return ytest
 
+""" Question2 c) """
 class RidgeLinearRegression(Regressor):
     """
     Linear Regression with ridge regularization (l2 regularization)
@@ -147,11 +155,11 @@ class RidgeLinearRegression(Regressor):
         numsamples = Xtrain.shape[0] # shape[0] calculates the number of rows, shape[1] calculates the number of columns
         # Xless = Xtrain[:,self.params['features']]
         d = Xtrain.shape[1]
+        # identity matrix
         I = np.identity(d)
         # print (I.shape, Xless.shape)
-        # For Ridge Regression, add a ridger regularizer
         # lambda = 0.01
-        # no need to worry about singular value since we are adding lambda*I term which is always greater than 0
+        # For Ridge Regression, add a ridger regularizer
         self.weights = np.dot(np.dot(np.linalg.pinv(np.add(np.dot(Xtrain.T, Xtrain)/numsamples, self.params['regwgt']*I)), Xtrain.T), ytrain)/numsamples # simple explicitly slove for w
 
     def predict(self, Xtest):
@@ -199,9 +207,9 @@ class LassoRegression(Regressor):
         # print (self.weights.shape)
         count = 0
         # d = Xtrain.shape[1]
-        self.weights = np.zeros([385,])
+        self.weights = np.zeros([385,]) # intialize the weights of vectors of zeros
         # print (self.weights.shape)
-        err = float('inf')
+        err = float('inf') # set error to be infinite at the beginning
         tolerance = 10e-4
         XX = np.dot(Xtrain.T, Xtrain)/numsamples
         Xy = np.dot(Xtrain.T, ytrain)/numsamples
@@ -211,6 +219,7 @@ class LassoRegression(Regressor):
             for j in range (Xtrain.shape[1]):
                 sum_ = np.square(Xtrain[i][j]) + sum_
         stepsize = 1/(2*np.sqrt(sum_))
+        # c(w)
         c_w = script.geterror(np.dot(Xtrain, self.weights), ytrain)
         while np.absolute(c_w-err) > tolerance:
             err = c_w
@@ -233,6 +242,8 @@ class SGD(Regressor):
     def __init__( self, parameters={} ):
         self.params = {'regwgt': 0.0, 'regwgt': 0.01, 'regwgt': 1.0} # subselected features
         self.reset(parameters)
+        self.numruns = 5
+        self.yaxis = np.zeros(1000)
 
     def learn(self, Xtrain, ytrain):
         """ Learns using the traindata """
@@ -250,7 +261,7 @@ class SGD(Regressor):
         epochs = 1000
         stepsize = 0.01
 
-        xaxis = np.zeros(1000) 
+        # xaxis = np.zeros(1000) 
 
         for i in range (epochs):
             # shuffle data points from 1, ..., numbersamples
@@ -263,8 +274,13 @@ class SGD(Regressor):
                 self.weights = np.subtract(self.weights, stepsize*gradient)
                 # print(self.weights)
 
-            xaxis[i] = script.geterror(np.dot(Xtrain, self.weights), ytrain)
-        return xaxis
+            self.yaxis[i] += script.geterror(np.dot(Xtrain, self.weights), ytrain)
+
+        # x = np.arange(1000)
+        # plt.plot(x, self.yaxis)
+        # plt.show()
+    def data(self):
+        return self.yaxis/self.numruns
 
     def predict(self, Xtest):
         # Xless = Xtest[:,self.params['features']]
@@ -277,33 +293,37 @@ class batchGD(Regressor):
     def __init__( self, parameters={} ):
         self.params = {'regwgt': 0.0, 'regwgt': 0.01, 'regwgt': 1.0}
         self.reset(parameters)
+        self.numruns = 5
+        self.yaxis = np.zeros(5000)
+        self.xaxis = np.arange(5000)
 
     def lineSearch(slef, Xtrain, ytrain, weight_t, gradient, cost):
 
         numsamples = Xtrain.shape[0]
         stepsize_max = 1.0
         t = 0.5 # stepsize reduces more quickly
-        tolerance = 10e-4
+        tolerance = 10e-5
         stepsize = stepsize_max
-        weight = weight_t.copy()
-        obj = cost.copy()
+        weight = weight_t.copy() # weight_t is self.weights 
+        obj = cost
         max_interation = 100
         i = 0
+
         while i < max_interation:
             weight = weight_t - stepsize * gradient
-            cost = script.geterror(np.dot(Xtrain, weight), ytrain)
-            gradient = np.dot(Xtrain.T, np.subtract(np.dot(Xtrain, weight), ytrain))/numsamples
+            # gradient = np.dot(Xtrain.T, np.subtract(np.dot(Xtrain, weight), ytrain))/numsamples
             if (cost < obj-tolerance):
                 break
             else:
                 # print ("else")
                 stepsize = t * stepsize
+            cost = script.geterror(np.dot(Xtrain, weight), ytrain)
             i = i + 1
         if i == max_interation:
             # print ("i")
             stepsize = 0
-            return weight_t, stepsize 
-        return weight, stepsize
+            return stepsize 
+        return stepsize
 
     def learn(self, Xtrain, ytrain):
         """ Learns using the traindata """
@@ -329,13 +349,22 @@ class batchGD(Regressor):
         while np.absolute(c_w-err) > tolerance:
             err = c_w
             gradient = np.dot(Xtrain.T, np.subtract(np.dot(Xtrain, self.weights), ytrain))/numsamples
-            self.weights, stepsize = self.lineSearch(Xtrain, ytrain, self.weights, gradient, c_w)
+            stepsize = self.lineSearch(Xtrain, ytrain, self.weights, gradient, c_w)
             # print(self.weights)
-            c_w = script.geterror(np.dot(Xtrain, self.weights), ytrain)
             self.weights = self.weights - stepsize*gradient
+            c_w = script.geterror(np.dot(Xtrain, self.weights), ytrain)
             # print(self.weights)
+            if (count < 5000):
+                self.xaxis[count] = count
+                self.yaxis[count] += err
             count = count + 1
-        print (count)
+        # print (count)
+
+        # plt.plot(self.xaxis, self.yaxis/self.numruns)
+        # plt.show()
+
+    def data(self):
+        return self.yaxis/self.numruns
 
     def predict(self, Xtest):
         # Xless = Xtest[:,self.params['features']]
