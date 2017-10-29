@@ -178,19 +178,20 @@ class LassoRegression(Regressor):
         self.params = {'regwgt': 0.0, 'regwgt': 0.01, 'regwgt': 1.0}
         self.reset(parameters)
 
-    def prox(self, weight, stepsize):
+    def prox(self, weight, stepsize, regwgt):
         # print(weight)
         # print(weight[1])
+        # print (regwgt)
         for i in range (weight.shape[0]):
             # print (weight[i])
-            if weight[i] > 0.01*stepsize:
-                self.weights[i] = weight[i] - 0.01*stepsize
+            if weight[i] > regwgt*stepsize:
+                self.weights[i] = weight[i] - regwgt*stepsize
                 # print (self.weights[i])
-            elif np.absolute(weight[i]) <= 0.01*stepsize:
+            elif np.absolute(weight[i]) <= regwgt*stepsize:
                 self.weights[i] = 0
                 # print (self.weights[i])
-            elif weight[i] < -0.01*stepsize:
-                self.weights[i] = weight[i] + 0.01*stepsize
+            elif weight[i] < -regwgt*stepsize:
+                self.weights[i] = weight[i] + regwgt*stepsize
                 # print (self.weights[i])
 
     def learn(self, Xtrain, ytrain):
@@ -210,7 +211,7 @@ class LassoRegression(Regressor):
         self.weights = np.zeros([385,]) # intialize the weights of vectors of zeros
         # print (self.weights.shape)
         err = float('inf') # set error to be infinite at the beginning
-        tolerance = 10e-4
+        tolerance = 10e-5
         XX = np.dot(Xtrain.T, Xtrain)/numsamples
         Xy = np.dot(Xtrain.T, ytrain)/numsamples
         # print (XX.shape, Xy.shape)
@@ -218,15 +219,23 @@ class LassoRegression(Regressor):
         for i in range (Xtrain.shape[0]):
             for j in range (Xtrain.shape[1]):
                 sum_ = np.square(Xtrain[i][j]) + sum_
+        # norm = np.linalg.norm(self.weights)
+        # print (norm, sum_)
         stepsize = 1/(2*np.sqrt(sum_))
         # c(w)
-        c_w = script.geterror(np.dot(Xtrain, self.weights), ytrain)
+        c_w = script.geterror(np.dot(Xtrain, self.weights), ytrain) 
         while np.absolute(c_w-err) > tolerance:
             err = c_w
             var = np.add(np.subtract(self.weights, stepsize*np.dot(XX, self.weights)), stepsize*Xy)
-            # print (var)
-            self.prox(var, stepsize)
-            c_w = script.geterror(np.dot(Xtrain, self.weights), ytrain)
+            # print (var, self.weights)
+            self.prox(var, stepsize, self.params['regwgt'])
+            # print (self.weights)
+            # norm = 0
+            # for i in range (self.weights.shape[0]):
+                # norm = norm + np.absolute(self.weights[i])
+            norm = np.linalg.norm(self.weights, ord=1)
+            # print (norm, norm_)
+            c_w = script.geterror(np.dot(Xtrain, self.weights), ytrain) + self.params['regwgt'] * norm
             # count = count + 1
         # print (self.weights)
 
@@ -240,7 +249,7 @@ class LassoRegression(Regressor):
 class SGD(Regressor):
 
     def __init__( self, parameters={} ):
-        self.params = {'regwgt': 0.0, 'regwgt': 0.01, 'regwgt': 1.0} # subselected features
+        self.params = {'regwgt': 0.01} # subselected features
         self.reset(parameters)
         self.numruns = 5
         self.yaxis = np.zeros(1000)
@@ -291,7 +300,7 @@ class SGD(Regressor):
 class batchGD(Regressor):
 
     def __init__( self, parameters={} ):
-        self.params = {'regwgt': 0.0, 'regwgt': 0.01, 'regwgt': 1.0}
+        self.params = {'regwgt': 0.01}
         self.reset(parameters)
         self.numruns = 5
         self.yaxis = np.zeros(5000)

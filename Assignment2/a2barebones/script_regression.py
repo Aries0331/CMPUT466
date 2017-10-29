@@ -78,12 +78,15 @@ if __name__ == '__main__':
                 # Train model
                 learner.learn(trainset[0], trainset[1])
                 # Test model
-                predictions = learner.predict(trainset[0])
+                predictions = learner.predict(trainset[0])  
                 # get return value of errors from each regression function 
                 y[learnername] = learner.data()
-                error = geterror(trainset[1], predictions)
+                error = geterror(trainset[1], predictions) # change to training error
                 # stderr = np.std(predictions,ddof=1)
-                print ('Error for ' + learnername + ': ' + str(error))
+                print ('Training error for ' + learnername + ': ' + str(error))
+                predictions_test = learner.predict(testset[0]) 
+                error_test = geterror(testset[1], predictions_test)
+                print ('Test error for ' + learnername + ': ' + str(error_test))
                 errors[learnername][p,r] = error
                 # errors[learnername][p,r] = stderr
 
@@ -95,11 +98,11 @@ if __name__ == '__main__':
             for r in range(numruns):
                 sum_ = sum_ + errors[learnername][p,r]
             mean = sum_/numruns
-            print ('Average error for ' + learnername + ': ' + str(mean))
+            # print ('Average error for ' + learnername + ': ' + str(mean))
             for r in range(numruns):
                 std = std + (errors[learnername][p,r] - mean)**2
-            stderr = np.sqrt(std/numruns-1)/np.sqrt(numruns)
-            print ('Standard error for ' + learnername + ': ' + str(stderr))
+        stderr = np.sqrt(std/numruns-1)/np.sqrt(numruns)
+        print ('Standard error for ' + learnername + ': ' + str(stderr))
 
     for learnername in regressionalgs:
         besterror = np.mean(errors[learnername][0,:])
