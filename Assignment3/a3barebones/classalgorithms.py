@@ -97,7 +97,8 @@ class NaiveBayes(Classifier):
         """
 
         ### YOUR CODE HERE
-
+        self.numclasses = 2
+        self.numfeatures = 9
         ### END YOUR CODE
 
         origin_shape = (self.numclasses, self.numfeatures)
@@ -105,7 +106,17 @@ class NaiveBayes(Classifier):
         self.stds = np.zeros(origin_shape)
 
         ### YOUR CODE HERE
+        self.mean = np.mean(Xtrain, axis=0)
+        self.std = np.std(Xtrain, axis=0)
 
+        self.class_mean = np.zeros(origin_shape)
+        self.class_std = np.zeros(origin_shape)
+
+        for i in set(ytrain):
+            index = np.where(ytrain==i)
+            # print (index)
+            self.class_mean[i] = np.mean(Xtrain[index], axis=0)
+            self.class_std[i] = np.std(Xtrain[index], axis=0)
         ### END YOUR CODE
 
         assert self.means.shape == origin_shape
@@ -117,9 +128,14 @@ class NaiveBayes(Classifier):
         observations.
         """
         ytest = np.zeros(Xtest.shape[0], dtype=int)
-
+        
         ### YOUR CODE HERE
-
+        for x in Xtest:
+            xless = np.repeat([x], self.numclasses, axis=0)
+            likelihood = (1.0/np.sqrt(2*np.pi*np.square(self.class_std))) * np.exp((-1.0/(2*np.square(self.class_std)))*np.square(xless-self.class_mean))
+            likelihood = np.prod(likelihood, axis=1)
+            ytest.tolist().append(np.argmax(likelihood))
+        # print (ytest.shape)
         ### END YOUR CODE
 
         assert len(ytest) == Xtest.shape[0]
@@ -141,6 +157,10 @@ class LogitReg(Classifier):
             self.regularizer = (utils.l2, utils.dl2)
         else:
             self.regularizer = (lambda w: 0, lambda w: np.zeros(w.shape,))
+    
+    def sigmoid(self, x):
+        y = 1.0/(1+np.exp(-x))
+        return y
 
     def logit_cost(self, theta, X, y):
         """
@@ -150,7 +170,8 @@ class LogitReg(Classifier):
         cost = 0.0
 
         ### YOUR CODE HERE
-
+        p_1 = self.sigmoid(np.dot(theta, X))
+        cost = y*np.log(p_1) + (1-y)*np.log(1-p_1)
         ### END YOUR CODE
 
         return cost
@@ -163,7 +184,8 @@ class LogitReg(Classifier):
         grad = np.zeros(len(theta))
 
         ### YOUR CODE HERE
-
+        p_1 = self.sigmoid(np.dot(X,theta))
+        grad = np.dot((p_1-y), X)
         ### END YOUR CODE
 
         return grad
@@ -176,7 +198,11 @@ class LogitReg(Classifier):
         self.weights = np.zeros(Xtrain.shape[1],)
 
         ### YOUR CODE HERE
-
+        grad = self.logit_cost_grad(self.weights, Xtrain, ytrain)
+        n, m = Xtrain.shape
+        for i in range (n):
+            for j in range (m):
+                self.weights[j] = self.weights[j] - grad[j]*(self.sigmoid(np.dot(Xtrain[i], self.weights))-ytrain[i])*Xtrain[i][j]
         ### END YOUR CODE
 
     def predict(self, Xtest):
@@ -187,6 +213,12 @@ class LogitReg(Classifier):
         ytest = np.zeros(Xtest.shape[0], dtype=int)
 
         ### YOUR CODE HERE
+        h = self.sigmoid(np.dot(Xtest, self.weights))
+        for i in range (Xtest.shape[0]):
+            if h[i] >= 0.5:
+                ytest[i] = 1
+            else:
+                ytest[i] = 0
 
         ### END YOUR CODE
 

@@ -25,16 +25,16 @@ if __name__ == '__main__':
     numruns = 10
 
     classalgs = {'Random': algs.Classifier(),
-                 'Naive Bayes': algs.NaiveBayes({'usecolumnones': False}),
-                 'Naive Bayes Ones': algs.NaiveBayes({'usecolumnones': True}),
-                 'Linear Regression': algs.LinearRegressionClass(),
+                 # 'Naive Bayes': algs.NaiveBayes({'usecolumnones': False}),
+                 # 'Naive Bayes Ones': algs.NaiveBayes({'usecolumnones': True}),
+                 # 'Linear Regression': algs.LinearRegressionClass(),
                  'Logistic Regression': algs.LogitReg(),
-                 'Neural Network': algs.NeuralNet({'epochs': 100})
+                 # 'Neural Network': algs.NeuralNet({'epochs': 100})
                 }
     numalgs = len(classalgs)
 
     parameters = (
-        {'regwgt': 0.0, 'nh': 4},
+        {'regwgt': 0.0, 'nh': 4}, # nh: number of hidden layers
         {'regwgt': 0.01, 'nh': 8},
         {'regwgt': 0.05, 'nh': 16},
         {'regwgt': 0.1, 'nh': 32},
