@@ -14,6 +14,8 @@ def sigmoid(xvec):
     """ Compute the sigmoid function """
     # Cap -xvec, to avoid overflow
     # Undeflow is okay, since it get set to zero
+    # print("???")
+    # print (xvec)
     xvec[xvec < -100] = -100
 
     vecsig = 1.0 / (1.0 + np.exp(np.negative(xvec)))

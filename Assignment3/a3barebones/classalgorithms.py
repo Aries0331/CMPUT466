@@ -130,11 +130,17 @@ class NaiveBayes(Classifier):
         ytest = np.zeros(Xtest.shape[0], dtype=int)
         
         ### YOUR CODE HERE
+        h =[]
         for x in Xtest:
             xless = np.repeat([x], self.numclasses, axis=0)
             likelihood = (1.0/np.sqrt(2*np.pi*np.square(self.class_std))) * np.exp((-1.0/(2*np.square(self.class_std)))*np.square(xless-self.class_mean))
             likelihood = np.prod(likelihood, axis=1)
-            ytest.tolist().append(np.argmax(likelihood))
+            h = ytest.tolist().append(np.argmax(likelihood))
+        for i in range (Xtest.shape[0]):
+            if h[i] >= 0.5:
+                ytest[i] = 1
+            else:
+                ytest[i] = 0        
         # print (ytest.shape)
         ### END YOUR CODE
 
@@ -159,7 +165,9 @@ class LogitReg(Classifier):
             self.regularizer = (lambda w: 0, lambda w: np.zeros(w.shape,))
     
     def sigmoid(self, x):
+        ''' sigmoid function '''
         y = 1.0/(1+np.exp(-x))
+
         return y
 
     def logit_cost(self, theta, X, y):
@@ -171,7 +179,9 @@ class LogitReg(Classifier):
 
         ### YOUR CODE HERE
         p_1 = self.sigmoid(np.dot(theta, X))
+        # print (p_1)
         cost = y*np.log(p_1) + (1-y)*np.log(1-p_1)
+        cost = cost[0]
         ### END YOUR CODE
 
         return cost
@@ -266,10 +276,12 @@ class NeuralNet(Classifier):
         Returns the output of the current neural network for the given input
         """
         # hidden activations
-        a_hidden = self.transfer(np.dot(self.w_input, inputs))
+        # print(self.w_input.shape, inputs.shape)
+        a_hidden = self.transfer(np.dot(self.w_input, inputs)) # f2
 
         # output activations
-        a_output = self.transfer(np.dot(self.w_output, a_hidden))
+        # print(self.w_output.shape, a_hidden.shape)
+        a_output = self.transfer(np.dot(self.w_output, a_hidden)) # f1
 
         return (a_hidden, a_output)
 
@@ -280,7 +292,21 @@ class NeuralNet(Classifier):
         """
 
         ### YOUR CODE HERE
-
+        std = 1.0/np.sqrt(x.shape[1])
+        self.w_input = np.random.normal(0, std, (self.params['nh'], x.shape[1]))
+        self.w_output = np.random.normal(0, std, (y.shape[0], self.params['nh']))
+        # print(self.w_input.shape, self.w_output.shape)
+        h, y_hat = self.feedforward(x)
+        # print(h.shape, y_hat.shape)
+        # print("-----")
+        # print (self.feedforward(x))
+        # print("-----")
+        d_1 = y_hat - y
+        nabla_output = np.dot(d_1, h.T)
+        d_2 = np.dot(np.dot(h, self.w_output), (1-h))
+        nabla_input = np.dot(d_2, x)
+        # print(nabla_input.shape, nabla_output.shape)
+        print(nabla_input, nabla_output)
         ### END YOUR CODE
 
         assert nabla_input.shape == self.w_input.shape
@@ -288,6 +314,34 @@ class NeuralNet(Classifier):
         return (nabla_input, nabla_output)
 
     # TODO: implement learn and predict functions
+    def learn(self, Xtrain, ytrain):
+        """
+        Learn the weights using the training data
+        """
+        stepsize = 0.01
+        epochs = 10
+        nabla_input, nabla_output = self.backprop(Xtrain, ytrain)
+        for i in range (epochs):
+            self.w_output = self.w_output - stepsize*nabla_output
+            self.w_input = self.w_input - stepsize*nabla_input
+
+
+    def predit(self, Xtest):
+        """
+        Use the parameters computed in self.learn to give predictions on new
+        observations.
+        """
+        ytest = np.zeros(Xtest.shape[0], dtype=int)
+
+        h = self.transfer(np.dot(self.transfer(np.dot(Xtest, self.w_input)), self.w_output))
+        for i in range (Xtest.shape[0]):
+            if h[i] >= 0.5:
+                ytest[i] = 1
+            else:
+                ytest[i] = 0
+
+        assert len(ytest) == Xtest.shape[0]
+        return ytest        
 
 class KernelLogitReg(LogitReg):
     """ Implement kernel logistic regression.
