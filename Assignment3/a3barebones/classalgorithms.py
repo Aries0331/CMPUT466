@@ -135,9 +135,9 @@ class NaiveBayes(Classifier):
             xless = np.repeat([x], self.numclasses, axis=0)
             likelihood = (1.0/np.sqrt(2*np.pi*np.square(self.class_std))) * np.exp((-1.0/(2*np.square(self.class_std)))*np.square(xless-self.class_mean))
             likelihood = np.prod(likelihood, axis=1)
-            h = ytest.tolist().append(np.argmax(likelihood))
+            ytest.tolist().append(np.argmax(likelihood))
         for i in range (Xtest.shape[0]):
-            if h[i] >= 0.5:
+            if ytest[i] >= 0.5:
                 ytest[i] = 1
             else:
                 ytest[i] = 0        
@@ -181,8 +181,8 @@ class LogitReg(Classifier):
         # print("--1")
         p_1 = utils.sigmoid(np.dot(theta, X))
         # print (p_1)
-        cost = y*np.log(p_1) + (1-y)*np.log(1-p_1)
-        cost = cost[0]
+        cost = y*np.log(p_1) + (1-y)*np.log(1-p_1) 
+        cost = cost[0] 
         ### END YOUR CODE
 
         return cost
@@ -355,7 +355,6 @@ class NeuralNet(Classifier):
                 # print (Xtrain[j].shape)
                 gradient_1, gradient_2 = self.backprop(Xtrain[j], ytrain[j])
                 # print (gradient)
-                stepsize = 0.01/(1+i) # decrease stepsize to converge
                 self.w_output = self.w_output - stepsize*gradient_2
                 self.w_input = self.w_input - stepsize*gradient_1
 
@@ -367,9 +366,9 @@ class NeuralNet(Classifier):
         """
         ytest = np.zeros(Xtest.shape[0], dtype=int)
 
-        h = self.transfer(np.dot(self.transfer(np.dot(Xtest, self.w_input)), self.w_output))
         for i in range (Xtest.shape[0]):
-            if h[i] >= 0.5:
+            h, y = self.feedforward(Xtest[i])
+            if y >= 0.5:
                 ytest[i] = 1
             else:
                 ytest[i] = 0
@@ -395,6 +394,72 @@ class KernelLogitReg(LogitReg):
         self.params = {'regwgt': 0.0, 'regularizer': 'None', 'kernel': 'None'}
         self.reset(parameters)
 
+    def resrt(self, parameters):
+        self.resetparams(parameters)
+
+    def init(self, Xtrain, ytrain):
+        self.numcenters = 10
+        self.centers = Xtrain[:self.numcenters]
+
+    def linear(self, x, c):
+        '''
+        linear kernel
+        '''
+        k = 0
+        for i in range (x.shape[0]):
+            k = k + x[i]*c[i]
+        return k
+
+    def hamming(self, x, c):
+        '''
+        Hamming distance kernel
+        '''
+        k = 0 
+        for i in range (len(x)):
+            if x[i] != c[i]:
+                k = k + 1
+        return k
+
+    def logit_cost(self, theta, X, y):
+        """
+        Compute cost for logistic regression using theta as the parameters.
+        """
+
+        cost = 0.0
+
+        for i in range (X.shape[0]):
+            cost = cost + (y[i]-1)*np.dot(X[i], theta) + np.log(utils.sigmoid(np.dot(X[i], theta)))
+
+        cost = cost/n*(-1.0)
+
+        return cost
+
+    def logit_cost_grad(self, theta, X, y):
+        """
+        Compute gradients of the cost with respect to theta.
+        """
+
+        grad = np.zeros(len(theta))
+        stepsize = 0.01
+        grad = np.dot(utils.sigmoid(np.dot(X, theta))-y, X)
+        grad = grad * stepsize       
+
+        return grad
+
+    def transform(self, Xtrain):
+        '''
+        transform the data to new representation
+        '''
+        Ktrain = np.zeros((Xtrain.shape[0], self.numcenters))
+
+        for i in range (Xtrain.shape[0]):
+            for j in range (self.numcenters):
+                if self.params['kernel'] == 'linear':
+                    Ktrain[i][j] = self.linear(Xtrain[i], self.centers[j])
+                elif self.params['kernel'] == 'hamming':
+                    Ktrain[i][j] == self.hamming(Xtrain[i], self.centers[j])
+        return Ktrain
+
     def learn(self, Xtrain, ytrain):
         """
         Learn the weights using the training data.
@@ -404,28 +469,45 @@ class KernelLogitReg(LogitReg):
         Ktrain = None
 
         ### YOUR CODE HERE
-        # if self.params['kernel'] == 'linear':
-        Ktrain = 
-        # elif self.params['kernel'] == 'hamming':
-
+        self.init(Xtrain, ytrain)
+        Ktrain = self.transform(Xtrain)
         ### END YOUR CODE
 
         self.weights = np.zeros(Ktrain.shape[1],)
 
         ### YOUR CODE HERE
-        grad = self.logit_cost_grad(self.weights, Ktrain, ytrain)
-        n, m = Ktrain.shape
-        for i in range (n):
-            for j in range (m):
-                # print("33")
-                p_1 = utils.sigmoid(np.dot(Ktrain,self.weights))
-                self.weights[j] = self.weights[j] - grad[j]*np.dot((p_1[j]-ytrain[j]).T, Ktrain[i][j])
+        epochs = 100
+        stepsize = 0.01
+        numsamples = Xtrain.shape[0]
+        for i in range (epochs):
+            # shuffle data points from 1, ..., numbsamples
+            arr = np.arange(numsamples)
+            np.random.shuffle(arr)
+            for j in arr:
+                gradient = np.dot(self.logit_cost_grad(self.weights, Ktrain[j], ytrain[j]), Ktrain[j])
+                # print (gradient)
+                self.weights = self.weights-stepsize*gradient
         ### END YOUR CODE
 
         self.transformed = Ktrain # Don't delete this line. It's for evaluation.
 
     # TODO: implement necessary functions
+    def predict(self, Xtest):
+        """
+        Use the parameters computed in self.learn to give predictions on new
+        observations.
+        """
+        ytest = np.zeros(Xtest.shape[0], dtype=int)
 
+        ktest = self.transform(Xtest)
+        ytest = utils.sigmoid(np.dot(ktest, self.weights))
+        for i in range (len(ytest)):
+            if ytest[i] >= 0.5:
+                ytest[i] = 1
+            else:
+                ytest[i] = 0
+
+        return ytest       
 
 # ======================================================================
 
