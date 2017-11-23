@@ -29,12 +29,14 @@ if __name__ == '__main__':
                  # 'Naive Bayes Ones': algs.NaiveBayes({'usecolumnones': True}),
                  # 'Linear Regression': algs.LinearRegressionClass(),
                  # 'Logistic Regression': algs.LogitReg(),
-                 'Neural Network': algs.NeuralNet({'epochs': 100})
+                 'Neural Network': algs.NeuralNet({'epochs': 100}),
+                 # 'Kernel Logistic Regress': algs.KernelLogitReg({'kernel': 'linear'}),
+                 # 'Kernel Logistic Regress': algs.KernelLogitReg({'kernel': 'hamming'}),
                 }
     numalgs = len(classalgs)
 
     parameters = (
-        {'regwgt': 0.0, 'nh': 4}, # nh: number of hidden layers
+        {'regwgt': 0.0, 'nh': 4}, # nh: number of hidden units
         {'regwgt': 0.01, 'nh': 8},
         {'regwgt': 0.05, 'nh': 16},
         {'regwgt': 0.1, 'nh': 32},
@@ -45,9 +47,9 @@ if __name__ == '__main__':
     for learnername in classalgs:
         errors[learnername] = np.zeros((numparams,numruns))
 
-    for r in range(numruns):
+    for r in range(numruns): # different dataset for algorithm
         trainset, testset = dtl.load_susy(trainsize,testsize)
-        #trainset, testset = dtl.load_susy_complete(trainsize,testsize)
+        # trainset, testset = dtl.load_susy_complete(trainsize,testsize)
         #trainset, testset = dtl.load_census(trainsize,testsize)
         
         print(('Running on train={0} and test={1} samples for run {2}').format(trainset[0].shape[0], testset[0].shape[0],r))

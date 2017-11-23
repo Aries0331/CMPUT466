@@ -166,7 +166,7 @@ class LogitReg(Classifier):
     
     def sigmoid(self, x):
         ''' sigmoid function '''
-        y = 1.0/(1+np.exp(-x))
+        y = 1.0/(1+np.exp(-1.0*x))
 
         return y
 
@@ -178,7 +178,8 @@ class LogitReg(Classifier):
         cost = 0.0
 
         ### YOUR CODE HERE
-        p_1 = self.sigmoid(np.dot(theta, X))
+        # print("--1")
+        p_1 = utils.sigmoid(np.dot(theta, X))
         # print (p_1)
         cost = y*np.log(p_1) + (1-y)*np.log(1-p_1)
         cost = cost[0]
@@ -194,8 +195,10 @@ class LogitReg(Classifier):
         grad = np.zeros(len(theta))
 
         ### YOUR CODE HERE
-        p_1 = self.sigmoid(np.dot(X,theta))
-        grad = np.dot((p_1-y), X)
+        # print (X.shape, y.shape)
+        p_1 = utils.sigmoid(np.dot(X,theta))
+        # print (p_1.shape, y.shape, X.shape)
+        grad = p_1 - y
         ### END YOUR CODE
 
         return grad
@@ -208,11 +211,18 @@ class LogitReg(Classifier):
         self.weights = np.zeros(Xtrain.shape[1],)
 
         ### YOUR CODE HERE
-        grad = self.logit_cost_grad(self.weights, Xtrain, ytrain)
-        n, m = Xtrain.shape
-        for i in range (n):
-            for j in range (m):
-                self.weights[j] = self.weights[j] - grad[j]*(self.sigmoid(np.dot(Xtrain[i], self.weights))-ytrain[i])*Xtrain[i][j]
+        epochs = 100
+        stepsize = 0.01
+        numsamples = Xtrain.shape[0]
+        for i in range (epochs):
+            # shuffle data points from 1, ..., numbsamples
+            arr = np.arange(numsamples)
+            np.random.shuffle(arr)
+            for j in arr:
+                gradient = np.dot(self.logit_cost_grad(self.weights, Xtrain[arr[j]], ytrain[arr[j]]), Xtrain[arr[j]])
+                # print (gradient)
+                stepsize = 0.01/(1+i) # decrease stepsize to converge
+                self.weights = self.weights-stepsize*gradient
         ### END YOUR CODE
 
     def predict(self, Xtest):
@@ -223,7 +233,9 @@ class LogitReg(Classifier):
         ytest = np.zeros(Xtest.shape[0], dtype=int)
 
         ### YOUR CODE HERE
-        h = self.sigmoid(np.dot(Xtest, self.weights))
+        # print("22")
+        # print (Xtest.shape, self.weights.shape)
+        h = utils.sigmoid(np.dot(Xtest, self.weights))
         for i in range (Xtest.shape[0]):
             if h[i] >= 0.5:
                 ytest[i] = 1
@@ -268,8 +280,15 @@ class NeuralNet(Classifier):
         else:
             # For now, only allowing sigmoid transfer
             raise Exception('NeuralNet -> can only handle sigmoid transfer, must set option transfer to string sigmoid')
-        self.w_input = None
-        self.w_output = None
+        # self.w_input = None
+        # self.w_output = None
+
+    def init(self, X, Y):
+        std = 1.0/np.sqrt(X.shape[1])
+        self.numfeatures = X.shape[1]
+        self.w_input = np.random.normal(0, std, (self.params['nh'], self.numfeatures))
+        self.w_output = np.random.normal(0, std, (1, self.params['nh']))
+        # print(self.w_input.shape, self.w_output.shape)
 
     def feedforward(self, inputs):
         """
@@ -292,21 +311,26 @@ class NeuralNet(Classifier):
         """
 
         ### YOUR CODE HERE
-        std = 1.0/np.sqrt(x.shape[1])
-        self.w_input = np.random.normal(0, std, (self.params['nh'], x.shape[1]))
-        self.w_output = np.random.normal(0, std, (y.shape[0], self.params['nh']))
-        # print(self.w_input.shape, self.w_output.shape)
+        # h = np.zeros(self.params['nh'])
+        # for i in range ():
+        # print(x.shape)
         h, y_hat = self.feedforward(x)
         # print(h.shape, y_hat.shape)
         # print("-----")
         # print (self.feedforward(x))
         # print("-----")
         d_1 = y_hat - y
-        nabla_output = np.dot(d_1, h.T)
-        d_2 = np.dot(np.dot(h, self.w_output), (1-h))
-        nabla_input = np.dot(d_2, x)
-        # print(nabla_input.shape, nabla_output.shape)
-        print(nabla_input, nabla_output)
+        d_2 = np.zeros(self.params['nh'])
+        nabla_output = np.zeros((1,self.params['nh']))
+        for i in range (self.params['nh']):
+            nabla_output[0][i] = d_1 * h[i]
+        nabla_input = np.zeros((self.params['nh'], self.numfeatures))
+        for i in range (self.params['nh']):
+            # print (h.shape, self.w_output.shape)
+            d_2[i] = (self.w_output[0][i] * d_1) * h[i] * (1-h[i])
+            nabla_input[i] = np.dot(d_2[i], x)    
+        # print(self.w_output.shape, nabla_output.shape)
+        # print(nabla_input, nabla_output)
         ### END YOUR CODE
 
         assert nabla_input.shape == self.w_input.shape
@@ -318,12 +342,22 @@ class NeuralNet(Classifier):
         """
         Learn the weights using the training data
         """
-        stepsize = 0.01
-        epochs = 10
-        nabla_input, nabla_output = self.backprop(Xtrain, ytrain)
+        self.init(Xtrain, ytrain)
+        stepsize = self.params['stepsize']
+        epochs = self.params['epochs']
+        # nabla_input, nabla_output = self.backprop(Xtrain, ytrain)
         for i in range (epochs):
-            self.w_output = self.w_output - stepsize*nabla_output
-            self.w_input = self.w_input - stepsize*nabla_input
+            arr = np.arange(Xtrain.shape[0])
+            np.random.shuffle(arr)
+            for j in arr:
+                # gradient_1 = np.dot(np.subtract(np.dot(Xtrain[arr[j]].T, self.weights), ytrain[arr[j]]), Xtrain[arr[j]])
+                # print ("----")
+                # print (Xtrain[j].shape)
+                gradient_1, gradient_2 = self.backprop(Xtrain[j], ytrain[j])
+                # print (gradient)
+                stepsize = 0.01/(1+i) # decrease stepsize to converge
+                self.w_output = self.w_output - stepsize*gradient_2
+                self.w_input = self.w_input - stepsize*gradient_1
 
 
     def predit(self, Xtest):
@@ -370,13 +404,22 @@ class KernelLogitReg(LogitReg):
         Ktrain = None
 
         ### YOUR CODE HERE
+        # if self.params['kernel'] == 'linear':
+        Ktrain = 
+        # elif self.params['kernel'] == 'hamming':
 
         ### END YOUR CODE
 
         self.weights = np.zeros(Ktrain.shape[1],)
 
         ### YOUR CODE HERE
-
+        grad = self.logit_cost_grad(self.weights, Ktrain, ytrain)
+        n, m = Ktrain.shape
+        for i in range (n):
+            for j in range (m):
+                # print("33")
+                p_1 = utils.sigmoid(np.dot(Ktrain,self.weights))
+                self.weights[j] = self.weights[j] - grad[j]*np.dot((p_1[j]-ytrain[j]).T, Ktrain[i][j])
         ### END YOUR CODE
 
         self.transformed = Ktrain # Don't delete this line. It's for evaluation.
