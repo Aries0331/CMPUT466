@@ -4,4 +4,13 @@ Jinzhu Li
 
 Question 1:
  
- a) 
+ (a) We will get the error: RuntimeWarning: divide by zero encountered in true_divide
+ This is because the standard deviation is zero.
+
+ (d)
+
+ Question 2:
+
+ (a)
+
+ (b)

@@ -99,6 +99,17 @@ class NaiveBayes(Classifier):
         ### YOUR CODE HERE
         self.numclasses = 2
         self.numfeatures = 9
+
+        # prior
+        p_0 = 0
+        p_1 = 0
+        for i in range (len(ytrain)):
+            if ytrain[i] == 1:
+                p_0 += 1
+            else:
+                p_1 =+ 1
+        self.p_0 = p_0/Xtrain.shape[0]
+        self.p_1 = p_1/Xtrain.shape[0]
         ### END YOUR CODE
 
         origin_shape = (self.numclasses, self.numfeatures)
@@ -109,14 +120,25 @@ class NaiveBayes(Classifier):
         self.mean = np.mean(Xtrain, axis=0)
         self.std = np.std(Xtrain, axis=0)
 
-        self.class_mean = np.zeros(origin_shape)
-        self.class_std = np.zeros(origin_shape)
+        self.class_mean = np.zeros((self.numclasses, self.numfeatures))
+        self.class_std = np.zeros((self.numclasses, self.numfeatures))
+        n = Xtrain.shape[0]
 
-        for i in set(ytrain):
-            index = np.where(ytrain==i)
-            # print (index)
-            self.class_mean[i] = np.mean(Xtrain[index], axis=0)
-            self.class_std[i] = np.std(Xtrain[index], axis=0)
+        print(ytrain)
+        for i in range (len(ytrain)):
+            # index = np.where(ytrain==i)
+            # # print (index)
+            # self.class_mean[i] = np.mean(Xtrain[index], axis=0)
+            # self.class_std[i] = np.std(Xtrain[index], axis=0)
+            for j in range (self.numfeatures):
+                if ytrain[i] == 1:
+                    self.class_mean[1][j] = np.mean(Xtrain[:][j], axis=0)
+                    self.class_std[1][j] = np.std(Xtrain[:][j], axis=0)
+                elif ytrain[i] == 0:
+                    self.class_mean[0][j] = np.mean(Xtrain[:][j], axis=0)
+                    self.class_std[0][j] = np.std(Xtrain[:][j], axis=0)
+        print(self.class_mean[0],self.class_std[0])
+        print(self.class_mean[1],self.class_std[1])
         ### END YOUR CODE
 
         assert self.means.shape == origin_shape
@@ -130,18 +152,39 @@ class NaiveBayes(Classifier):
         ytest = np.zeros(Xtest.shape[0], dtype=int)
         
         ### YOUR CODE HERE
+        y = np.ones((self.numclasses, Xtest.shape[0]))
         h =[]
-        for x in Xtest:
-            xless = np.repeat([x], self.numclasses, axis=0)
-            likelihood = (1.0/np.sqrt(2*np.pi*np.square(self.class_std))) * np.exp((-1.0/(2*np.square(self.class_std)))*np.square(xless-self.class_mean))
-            likelihood = np.prod(likelihood, axis=1)
-            ytest.tolist().append(np.argmax(likelihood))
+        # for x in Xtest:
+        #     xless = np.repeat([x], self.numclasses, axis=0)
+        #     likelihood = (1.0/np.sqrt(2*np.pi*np.square(self.class_std))) * np.exp((-1.0/(2*np.square(self.class_std)))*np.square(xless-self.class_mean))
+        #     likelihood = np.prod(likelihood, axis=1)
+        #     ytest.tolist().append(np.argmax(likelihood))
+            # print (ytest)
         for i in range (Xtest.shape[0]):
-            if ytest[i] >= 0.5:
+            for j in range (self.numfeatures):
+                if self.class_std[0][j] == 0:
+                    # print("00")
+                    y[0][i] = y[0][j] * 1
+                else:
+                    # print("0")
+                    y[0][i] = (1.0/np.sqrt(2*np.pi*self.class_std[0][j])) * np.exp(-1.0*np.square(Xtest[i][j]-self.class_mean[0][j])/(2*self.class_std[0][j]))
+                if self.class_std[1][j] == 0:
+                    # print("10")
+                    y[1][i] = y[1][j] * 1
+                else:
+                    # print("1")
+                    y[1][i] = (1.0/np.sqrt(2*np.pi*self.class_std[1][j])) * np.exp(-1.0*np.square(Xtest[i][j]-self.class_mean[1][j])/(2*self.class_std[1][j]))
+            y[0][i] = y[0][i] * self.p_0
+            y[1][i] = y[1][i] * self.p_1
+        print("y")
+        print(y)
+        for i in range (Xtest.shape[0]):
+            if y[1][i] >= y[0][j]:
                 ytest[i] = 1
             else:
-                ytest[i] = 0        
-        # print (ytest.shape)
+                ytest[i] = 0 
+        print("ytest")       
+        print (ytest)
         ### END YOUR CODE
 
         assert len(ytest) == Xtest.shape[0]
@@ -182,7 +225,8 @@ class LogitReg(Classifier):
         p_1 = utils.sigmoid(np.dot(theta, X))
         # print (p_1)
         cost = y*np.log(p_1) + (1-y)*np.log(1-p_1) 
-        cost = cost[0] 
+        # + 0.5*self.params['regwgt']*np.dot(theta, theta)
+        cost = cost[0]
         ### END YOUR CODE
 
         return cost
@@ -198,7 +242,8 @@ class LogitReg(Classifier):
         # print (X.shape, y.shape)
         p_1 = utils.sigmoid(np.dot(X,theta))
         # print (p_1.shape, y.shape, X.shape)
-        grad = p_1 - y
+        grad = p_1 - y 
+        # + self.params['regwgt'] * theta
         ### END YOUR CODE
 
         return grad
@@ -440,9 +485,9 @@ class KernelLogitReg(LogitReg):
         """
 
         grad = np.zeros(len(theta))
-        stepsize = 0.01
-        grad = np.dot(utils.sigmoid(np.dot(X, theta))-y, X)
-        grad = grad * stepsize       
+
+        grad = utils.sigmoid(np.dot(X, theta)) - y
+        # grad = grad * stepsize       
 
         return grad
 
@@ -501,6 +546,7 @@ class KernelLogitReg(LogitReg):
 
         ktest = self.transform(Xtest)
         ytest = utils.sigmoid(np.dot(ktest, self.weights))
+
         for i in range (len(ytest)):
             if ytest[i] >= 0.5:
                 ytest[i] = 1
