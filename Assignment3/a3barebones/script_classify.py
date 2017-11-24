@@ -25,10 +25,10 @@ if __name__ == '__main__':
     numruns = 10
 
     classalgs = {'Random': algs.Classifier(),
-                 'Naive Bayes': algs.NaiveBayes({'usecolumnones': False}),
-                 'Naive Bayes Ones': algs.NaiveBayes({'usecolumnones': True}),
+                 # 'Naive Bayes': algs.NaiveBayes({'usecolumnones': False}),
+                 # 'Naive Bayes Ones': algs.NaiveBayes({'usecolumnones': True}),
                  # 'Linear Regression': algs.LinearRegressionClass(),
-                 # 'Logistic Regression': algs.LogitReg(),
+                 'Logistic Regression': algs.LogitReg(),
                  # 'Neural Network': algs.NeuralNet({'epochs': 100}),
                  # 'Kernel Logistic Regress linear': algs.KernelLogitReg({'kernel': 'linear'}),
                  # 'Kernel Logistic Regress hamming': algs.KernelLogitReg({'kernel': 'hamming'}),

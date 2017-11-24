@@ -241,7 +241,10 @@ class LogitReg(Classifier):
         # print (X.shape, y.shape)
         p_1 = utils.sigmoid(np.dot(X,theta))
         # print (p_1.shape, y.shape, X.shape)
-        grad = p_1 - y 
+        if self.params['regularizer'] == 'l2':
+            grad = p_1 - y + + self.params['regwgt'] * theta
+        else: 
+            grad = p_1 - y 
         # + self.params['regwgt'] * theta
         ### END YOUR CODE
 
