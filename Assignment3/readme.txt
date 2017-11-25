@@ -22,7 +22,7 @@ Average error for Neural Network: 24.08 +- 1.12346670994e-15
 Best parameters for Logistic Regression: {'regwgt': 0.0, 'regularizer': 'None'}
 Average error for Logistic Regression: 26.64 +- 2.24693341989e-15
 
-Generally, the neural network with 32 hidden units performers better than Linear Regression, than Naive Bayes, than logistic regression.
+Generally, the neural network with 32 hidden units performers better than Linear Regression, than Naive Bayes, than logistic regression. 
 
  Question 2:
 

@@ -560,7 +560,8 @@ class KernelLogitReg(LogitReg):
 
         ktest = self.transform(Xtest)
         ytest = utils.sigmoid(np.dot(ktest, self.weights))
-
+        print(ktest)
+        print(self.weights)
         for i in range (len(ytest)):
             if ytest[i] >= 0.5:
                 ytest[i] = 1
