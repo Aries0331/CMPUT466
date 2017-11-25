@@ -1,0 +1,22 @@
+Average error for Random: 49.34 +- 2.24693341989e-15
+Best parameters for Naive Bayes: {'usecolumnones': False}
+Average error for Naive Bayes: 25.78 +- 0.0
+Best parameters for Naive Bayes Ones: {'usecolumnones': True}
+Average error for Naive Bayes Ones: 25.78 +- 0.0
+Best parameters for Linear Regression: {'regwgt': 0.0}
+Average error for Linear Regression: 25.02 +- 1.12346670994e-15
+
+Running learner = Neural Network on parameters {'nh': 32, 'transfer': 'sigmoid', 'epochs': 100, 'stepsize': 0.01}
+Error for Neural Network: 24.08
+
+Best parameters for Neural Network: {'nh': 32, 'transfer': 'sigmoid', 'epochs': 100, 'stepsize': 0.01}
+Average error for Neural Network: 24.08 +- 1.12346670994e-15
+Best parameters for Logistic Regression: {'regwgt': 0.0, 'regularizer': 'None'}
+Average error for Logistic Regression: 26.64 +- 2.24693341989e-15
+
+Best parameters for Kernel Logistic Regress linear: {'kernel': 'linear', 'regwgt': 0.01, 'regularizer': 'None'}
+Average error for Kernel Logistic Regress linear: 24.68 +- 0.0
+
+Average error for Random: 49.698 +- 0.189154962927
+Best parameters for Kernel Logistic Regress hamming: {'kernel': 'hamming', 'regwgt': 0.0, 'regularizer': 'None'}
+Average error for Kernel Logistic Regress hamming: 24.188 +- 0.0872330212706

@@ -30,8 +30,8 @@ if __name__ == '__main__':
                  # 'Linear Regression': algs.LinearRegressionClass(),
                  # 'Logistic Regression': algs.LogitReg(),
                  # 'Neural Network': algs.NeuralNet({'epochs': 100}),
-                 # 'Kernel Logistic Regress linear': algs.KernelLogitReg({'kernel': 'linear'}),
-                 'Kernel Logistic Regress hamming': algs.KernelLogitReg({'kernel': 'hamming'}),
+                 'Kernel Logistic Regress linear': algs.KernelLogitReg({'kernel': 'linear'}),
+                 # 'Kernel Logistic Regress hamming': algs.KernelLogitReg({'kernel': 'hamming'}),
                 }
     numalgs = len(classalgs)
 
@@ -48,9 +48,9 @@ if __name__ == '__main__':
         errors[learnername] = np.zeros((numparams,numruns))
 
     for r in range(numruns): # different dataset for algorithm
-        # trainset, testset = dtl.load_susy(trainsize,testsize)
+        trainset, testset = dtl.load_susy(trainsize,testsize)
         # trainset, testset = dtl.load_susy_complete(trainsize,testsize)
-        trainset, testset = dtl.load_census(trainsize,testsize) # for hamming kernel
+        # trainset, testset = dtl.load_census(trainsize,testsize) # for hamming kernel
         
         print(('Running on train={0} and test={1} samples for run {2}').format(trainset[0].shape[0], testset[0].shape[0],r))
 
