@@ -6,6 +6,13 @@ import utilities as utils
 import script_regression as script
 import matplotlib.pyplot as plt
 
+# Neural Network regression
+from sklearn.neural_network import MLPRegressor
+# Support Vector Machines
+from sklearn.svm import SVR
+# Random Forest regression
+from sklearn.ensemble import RandomForestRegressor
+
 class Regressor:
     """
     Generic regression interface; returns random regressor
@@ -48,30 +55,6 @@ class Regressor:
     def data(self):
         self.yaxis = np.zeros(0)
 
-class RangePredictor(Regressor):
-    """
-    Random predictor randomly selects value between max and min in training set.
-    """
-
-    def __init__( self, parameters={} ):
-        """ Params can contain any useful parameters for the algorithm """
-        self.params = {}
-        self.reset(parameters)
-
-    def reset(self, parameters):
-        self.resetparams(parameters)
-        self.min = 0
-        self.max = 1
-        
-    def learn(self, Xtrain, ytrain):
-        """ Learns using the traindata """
-        self.min = np.amin(ytrain)
-        self.max = np.amax(ytrain)
-
-    def predict(self, Xtest):
-        ytest = np.random.rand(Xtest.shape[0])*(self.max-self.min) + self.min
-        return ytest
-
 class MeanPredictor(Regressor):
     """
     Returns the average target value observed; a reasonable baseline
@@ -92,4 +75,83 @@ class MeanPredictor(Regressor):
         return np.ones((Xtest.shape[0],))*self.mean
 
 class NeuralNetwork(Regressor):
+
+    def __init__( self, parameters={} ):
+        self.params = {}
+        self.reset(parameters)
+
+    def reset(self, parameters):
+        """ Reset learner """
+        self.mlp = None
+        self.weights = None
+        self.resetparams(parameters)
     
+    def learn(self, Xtrain, ytrain):
+
+        # print(Xtrain.shape, ytrain.shape)
+        self.mlp = MLPRegressor(hidden_layer_sizes=(32,), activation='relu', solver='adam', max_iter=50000)
+
+        self.weights = self.mlp.fit(Xtrain, ytrain)
+
+    def predict(self, Xtest):
+
+        ytest = self.mlp.predict(Xtest)
+        # print("NN")
+        # print (ytest)
+
+        return ytest
+
+class SVM(Regressor):
+
+    def __init__( self, parameters={} ):
+        self.params = {}
+        self.reset(parameters)
+
+    def reset(self, parameters):
+        """ Reset learner """
+        self.clf = None
+        self.weights = None
+        self.resetparams(parameters)
+    
+    def learn(self, Xtrain, ytrain):
+
+        # print(Xtrain.shape, ytrain.shape)
+        self.clf = SVR(kernel='linear')
+
+        self.weights = self.clf.fit(Xtrain, ytrain)
+
+    def predict(self, Xtest):
+
+        ytest = self.clf.predict(Xtest)
+        # print("SVR")
+        # print (ytest)
+
+        return ytest
+
+class RandomForest(Regressor):
+
+    def __init__( self, parameters={} ):
+        self.params = {}
+        self.reset(parameters)
+
+    def reset(self, parameters):
+        """ Reset learner """
+        self.regr = None
+        self.weights = None
+        self.resetparams(parameters)
+    
+    def learn(self, Xtrain, ytrain):
+
+        # print(Xtrain.shape, ytrain.shape)
+        self.regr = RandomForestRegressor(max_depth=2, random_state=0)
+
+        self.weights = self.regr.fit(Xtrain, ytrain)
+
+    def predict(self, Xtest):
+
+        ytest = self.regr.predict(Xtest)
+        # print("SVR")
+        # print (ytest)
+
+        return ytest
+

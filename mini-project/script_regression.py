@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 
 import dataloader as dtl
 import regressionalgorithms as algs
+import utilities as utils
 
 def l2err(prediction,ytest):
     """ l2 error (i.e., root-mean-squared-error) """
@@ -23,8 +24,8 @@ def l2err_squared(prediction,ytest):
 def geterror(predictions, ytest):
     """ mean squared error """
     # Can change this to other error values
-    # return (l2err_squared(predictions,ytest)/ytest.shape[0])/2
-    return 0.5*l2err_squared(predictions,ytest)/ytest.shape[0]
+    # print(predictions, ytest)
+    return 0.5*l2err_squared(utils.sigmoid(-1.0*predictions),ytest)/ytest.shape[0]
 
 
 if __name__ == '__main__':
@@ -32,10 +33,11 @@ if __name__ == '__main__':
     testsize = 317
     numruns = 5
 
-    regressionalgs = {'Random': algs.Regressor(),
-                'Mean': algs.MeanPredictor(),
-                # 'Neural Network': algs.NeuralNetwork({'epochs': 100}),
-                # 'Support Vector Machines': algs.SVM(),
+    regressionalgs = {#'Random': algs.Regressor(),
+                # 'Mean': algs.MeanPredictor(),
+                'Neural Network': algs.NeuralNetwork(),
+                'Support Vector Machines': algs.SVM(),
+                'Random Forest Regression': algs.RandomForest(),
              }
     numalgs = len(regressionalgs)
 
@@ -67,17 +69,10 @@ if __name__ == '__main__':
                 # Train model
                 learner.learn(trainset[0], trainset[1])
                 # Test model
-                predictions = learner.predict(trainset[0])  
-                # get return value of errors from each regression function 
-                y[learnername] = learner.data()
-                error = geterror(trainset[1], predictions) # change to training error
-                # stderr = np.std(predictions,ddof=1)
-                print ('Training error for ' + learnername + ': ' + str(error))
-                predictions_test = learner.predict(testset[0]) 
-                error_test = geterror(testset[1], predictions_test)
-                print ('Test error for ' + learnername + ': ' + str(error_test))
+                predictions = learner.predict(testset[0])
+                error = geterror(testset[1], predictions)
+                print ('Error for ' + learnername + ': ' + str(error))
                 errors[learnername][p,r] = error
-                # errors[learnername][p,r] = stderr
 
 
     for learnername in regressionalgs:
