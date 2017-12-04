@@ -27,7 +27,6 @@ def geterror(predictions, ytest):
     # print(predictions, ytest)
     return 0.5*l2err_squared(utils.sigmoid(-1.0*predictions),ytest)/ytest.shape[0]
 
-
 if __name__ == '__main__':
     trainsize = 200
     testsize = 317

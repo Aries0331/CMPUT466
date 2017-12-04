@@ -89,7 +89,7 @@ class NeuralNetwork(Regressor):
     def learn(self, Xtrain, ytrain):
 
         # print(Xtrain.shape, ytrain.shape)
-        self.mlp = MLPRegressor(hidden_layer_sizes=(32,), activation='relu', solver='adam', max_iter=50000)
+        self.mlp = MLPRegressor(hidden_layer_sizes=(100,), activation='relu', solver='sgd', early_stopping=True)
 
         self.weights = self.mlp.fit(Xtrain, ytrain)
 
@@ -116,7 +116,7 @@ class SVM(Regressor):
     def learn(self, Xtrain, ytrain):
 
         # print(Xtrain.shape, ytrain.shape)
-        self.clf = SVR(kernel='linear')
+        self.clf = SVR(kernel='rbf')
 
         self.weights = self.clf.fit(Xtrain, ytrain)
 
