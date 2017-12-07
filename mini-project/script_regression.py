@@ -43,7 +43,7 @@ if __name__ == '__main__':
     # Enable the best parameter to be selected, to enable comparison
     # between algorithms with their best parameter settings
     parameters = (
-        {'regwgt': 0.0, 'nh': 32},
+        {'regwgt': 0.0, 'nh': 100},
                       )
     numparams = len(parameters)
 
