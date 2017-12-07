@@ -143,7 +143,7 @@ class RandomForest(Regressor):
     def learn(self, Xtrain, ytrain):
 
         # print(Xtrain.shape, ytrain.shape)
-        self.regr = RandomForestRegressor(max_depth=2, random_state=0)
+        self.regr = RandomForestRegressor(n_estimators=500, max_depth=2, random_state=0)
 
         self.weights = self.regr.fit(Xtrain, ytrain)
 
