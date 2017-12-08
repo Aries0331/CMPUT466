@@ -1,0 +1,24 @@
+All:
+Average error for Random Forest Regression: 96.261531984 +- 17.0061547666
+Average error for Neural Network: 35.6987900448 +- 22.3292797714
+Average error for Support Vector Machines: 0.197351618164 +- 0.057579360077
+
+STFWI:
+Average error for Random Forest Regression: 280.450950741 +- 97.7970415112
+Average error for Support Vector Machines: 0.187670998782 +- 0.0859162472219
+Average error for Neural Network: 17.5804461108 +- 5.98877779115
+
+FWI:
+Average error for Support Vector Machines: 0.106851551837 +- 0.0163366292708
+Average error for Random Forest Regression: 277.09339789 +- 127.549397764
+Average error for Neural Network: 27.3965966624 +- 7.05029989578
+
+STM:
+Average error for Random Forest Regression: 178.783063562 +- 76.4570739923
+Average error for Neural Network: 34.4786615634 +- 14.3715510821
+Average error for Support Vector Machines: 0.204747453522 +- 0.12895919758
+
+M:
+Average error for Random Forest Regression: 118.128874907 +- 22.6802779755
+Average error for Neural Network: 31.350712384 +- 8.46266259683
+Average error for Support Vector Machines: 0.120792902282 +- 0.0463031959106

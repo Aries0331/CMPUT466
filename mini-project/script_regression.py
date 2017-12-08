@@ -57,6 +57,11 @@ if __name__ == '__main__':
 
     for r in range(numruns):
         trainset, testset = dtl.load_dataset(trainsize,testsize)
+        ###### feature selection setup
+        # trainset, testset = dtl.load_STFWI(trainsize,testsize)
+        # trainset, testset = dtl.load_FWI(trainsize,testsize)
+        # trainset, testset = dtl.load_STM(trainsize,testsize)
+        # trainset, testset = dtl.load_M(trainsize,testsize)
         print(('Running on train={0} and test={1} samples for run {2}').format(trainset[0].shape[0], testset[0].shape[0],r))
 
         for p in range(numparams):
@@ -86,7 +91,7 @@ if __name__ == '__main__':
         # Extract best parameters
         learner.reset(parameters[bestparams])
         #print ('Best parameters for ' + learnername + ': ' + str(learner.getparams()))
-        print ('Average error for ' + learnername + ': ' + str(besterror))
-        print ('Standard error for ' + learnername + ': ' + str(np.std(errors[learnername][bestparams,:])/math.sqrt(numruns)))
+        print ('Average error for ' + learnername + ': ' + str(besterror) + ' +- ' + str(np.std(errors[learnername][bestparams,:])/math.sqrt(numruns)))
+        # print ('Standard error for ' + learnername + ': ' + str(np.std(errors[learnername][bestparams,:])/math.sqrt(numruns)))
 
 

@@ -93,6 +93,7 @@ class NeuralNetwork(Regressor):
 
         self.weights = self.mlp.fit(Xtrain, ytrain)
 
+
     def predict(self, Xtest):
 
         ytest = self.mlp.predict(Xtest)

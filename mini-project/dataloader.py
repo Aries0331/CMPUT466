@@ -10,7 +10,36 @@ def load_dataset(trainsize=200, testsize=317):
     dataset = loadcsv(filename)
     trainset, testset = splitdataset(dataset,trainsize, testsize)    
     return trainset,testset
- 
+
+###### feature selection setup
+def load_STFWI(trainsize=200, testsize=317):
+    """ A physics classification dataset """
+    filename = 'datasets/firedataset_STFWI.csv'
+    dataset = loadcsv(filename)
+    trainset, testset = splitdataset(dataset,trainsize, testsize)    
+    return trainset,testset
+
+def load_STM(trainsize=200, testsize=317):
+    """ A physics classification dataset """
+    filename = 'datasets/firedataset_STM.csv'
+    dataset = loadcsv(filename)
+    trainset, testset = splitdataset(dataset,trainsize, testsize)    
+    return trainset,testset
+
+def load_FWI(trainsize=200, testsize=317):
+    """ A physics classification dataset """
+    filename = 'datasets/firedataset_FWI.csv'
+    dataset = loadcsv(filename)
+    trainset, testset = splitdataset(dataset,trainsize, testsize)    
+    return trainset,testset
+
+def load_M(trainsize=200, testsize=317):
+    """ A physics classification dataset """
+    filename = 'datasets/firedataset_M.csv'
+    dataset = loadcsv(filename)
+    trainset, testset = splitdataset(dataset,trainsize, testsize)    
+    return trainset,testset 
+
 ####### Helper functions
 
 def loadcsv(filename):
